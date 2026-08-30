@@ -16,7 +16,7 @@ export const INSTITUTION = {
   fiucode: "AFLIN0001",
   city: "Mumbai",
   regulator: "RBI",
-  team: "Westerly",
+  team: "Codeanigans",
   product: "Sentinel",
 };
 

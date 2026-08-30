@@ -1,4 +1,4 @@
-# Sentinel by Westerly
+# Sentinel by Codeanigans
 
 **Start here with a co-developer: [WESTERLY.md](WESTERLY.md)** — what this is, what is left, day plan through **13 Sep**, and which Kaggle datasets to use.
 

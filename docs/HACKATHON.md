@@ -1,4 +1,4 @@
-# Westerly — Theme 1 winning playbook
+# Codeanigans — Theme 1 winning playbook
 
 Snowflake CoCo CLI Hackathon 2026, GCC Edition  
 https://hack2skill.com/event/cococlihack-gccedition/
@@ -37,7 +37,7 @@ Judges from Snowflake will look for **the CoCo happy path they taught in the wor
 
 ## Product: Sentinel, on Aarohan Finance Ltd.
 
-Fictional deposit-taking NBFC. Team name Westerly. Copilot persona: MLRO assistant.
+Fictional deposit-taking NBFC. Team name **Codeanigans**. Copilot persona: MLRO assistant.
 
 Four narrative cases (memorise these):
 
@@ -112,7 +112,7 @@ Repos: [building-ai-agents-with-coco-workshop](https://github.com/sfc-gh-rbachal
 
 ### Before 1 Sep (prototype)
 
-1. Register / confirm team Westerly on Hack2skill. Pick **Theme 1** only.
+1. Register / confirm team **Codeanigans** on Hack2skill. Pick **Theme 1** only.
 2. Record a 3–5 min unlisted video: Command center → two copilot questions → STR JSON download → 60s of a CoCo terminal session creating the agent.
 3. Submit: Git repo, video, 1-pager (problem, architecture, CoCo objects, demo prompts).
 4. Keep Snowflake objects named `SENTINEL.*` so judges can poke them if they have your account.

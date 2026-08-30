@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sentinel — Risk, Fraud & Regulatory Copilot",
   description:
-    "Westerly's Snowflake CoCo CLI hackathon build: an NBFC copilot that surfaces fraud and writes audit-ready STRs.",
+    "Codeanigans' Snowflake CoCo CLI hackathon build: an NBFC copilot that surfaces fraud and writes audit-ready STRs.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

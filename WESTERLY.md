@@ -1,10 +1,10 @@
-# WESTERLY — what this is, what is left, what to do until 13 Sep
+# CODEANIGANS — what this is, what is left, what to do until 13 Sep
 
 **Read this file first.** It is the only handover your co-developer needs.
 
 - Hackathon: [Snowflake CoCo CLI Hackathon 2026 — GCC Edition](https://hack2skill.com/event/cococlihack-gccedition/)
 - Theme: **1 — Risk, Fraud and Regulatory Intelligence Copilot**
-- Team: Westerly
+- Team: **Codeanigans**
 - Product: **Sentinel** (NBFC: Aarohan Finance Ltd.)
 - **Prototype submission: 13 September 2026** (use this date; ignore older “1 Sep” notes elsewhere)
 - Rubric: relevance 30% · technical execution 40% · completeness 30%
