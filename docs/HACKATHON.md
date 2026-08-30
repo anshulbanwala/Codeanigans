@@ -3,7 +3,7 @@
 Snowflake CoCo CLI Hackathon 2026, GCC Edition  
 https://hack2skill.com/event/cococlihack-gccedition/
 
-Prototype submissions close **1 September 2026**. Evaluation 2–21 Sep. Shortlist 23 Sep. Finale 1–4 Oct. Prize: $4,300 / ₹4,00,000 winner.
+**Prototype submission: 13 September 2026** (team date). Event page originally listed 1 Sep — use **13 Sep**. Prize: $4,300 / ₹4,00,000 winner. Full day-by-day plan: [WESTERLY.md](../WESTERLY.md).
 
 ## What the first theme actually asks
 

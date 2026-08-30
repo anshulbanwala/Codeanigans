@@ -1,5 +1,7 @@
 # Sentinel by Westerly
 
+**Start here with a co-developer: [WESTERLY.md](WESTERLY.md)** — what this is, what is left, day plan through **13 Sep**, and which Kaggle datasets to use.
+
 Risk, fraud and regulatory intelligence copilot for the **Snowflake CoCo CLI Hackathon 2026 — GCC Edition**, Theme 1.
 
 This repo is a complete prototype you can demo locally **today**, plus the SQL and CoCo prompts to reproduce it on the Snowflake credentials Hack2skill issued.
