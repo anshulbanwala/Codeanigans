@@ -1,0 +1,291 @@
+name: RISK_ANALYTICS
+description: Structured risk analytics for Aarohan Finance (synthetic NBFC). Covers fraud/AML transactions, alert management, customer risk profiles, daily liquidity metrics (LCR/NSFR/HQLA), and credit
+  exposure concentration. CREDIT_EXPOSURES is a standalone exposure-book table and must NOT be joined to CUSTOMERS. LIQUIDITY_DAILY is a standalone daily time series. Only TRANSACTIONS and ALERTS join to
+  CUSTOMERS via CUSTOMER_ID.
+tables:
+- name: TRANSACTIONS
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: TRANSACTIONS
+  dimensions:
+  - name: TXN_ID
+    expr: TXN_ID
+    data_type: VARCHAR
+    description: Unique transaction identifier
+  - name: ACCOUNT_ID
+    expr: ACCOUNT_ID
+    data_type: VARCHAR
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+    description: Customer identifier linking to CUSTOMERS table
+  - name: COUNTERPARTY
+    expr: COUNTERPARTY
+    data_type: VARCHAR
+  - name: CHANNEL
+    expr: CHANNEL
+    data_type: VARCHAR
+    description: 'Payment channel: CASH, UPI, NEFT, IMPS, RTGS, CARD'
+  - name: TXN_TYPE
+    expr: TXN_TYPE
+    data_type: VARCHAR
+    description: 'Transaction direction: credit or debit'
+  - name: CITY
+    expr: CITY
+    data_type: VARCHAR
+    description: City where the transaction originated
+  - name: IS_FRAUD
+    expr: IS_FRAUD
+    data_type: BOOLEAN
+    description: Whether the transaction is flagged as fraudulent
+  - name: TYPOLOGY
+    expr: TYPOLOGY
+    data_type: VARCHAR
+    description: 'AML typology: structuring, mule, round_trip, pep_unusual, or null for benign'
+  - name: NARRATIVE
+    expr: NARRATIVE
+    data_type: VARCHAR
+  time_dimensions:
+  - name: TXN_TS
+    expr: TXN_TS
+    data_type: TIMESTAMP_TZ
+    description: Transaction timestamp with timezone
+  facts:
+  - name: AMOUNT_INR
+    expr: AMOUNT_INR
+    data_type: NUMBER
+    description: Transaction amount in Indian Rupees
+  primary_key:
+    columns:
+    - TXN_ID
+- name: ALERTS
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: ALERTS
+  primary_key:
+    columns:
+    - ALERT_ID
+  dimensions:
+  - name: ALERT_ID
+    expr: ALERT_ID
+    data_type: VARCHAR
+    description: Unique alert identifier
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+  - name: ACCOUNT_ID
+    expr: ACCOUNT_ID
+    data_type: VARCHAR
+  - name: TITLE
+    expr: TITLE
+    data_type: VARCHAR
+    description: Short description of the alert
+  - name: TYPOLOGY
+    expr: TYPOLOGY
+    data_type: VARCHAR
+    description: 'Alert typology: structuring, mule, round_trip, pep_unusual, credit_risk'
+  - name: STATUS
+    expr: STATUS
+    data_type: VARCHAR
+    description: 'Alert lifecycle status: open, investigating, escalated'
+  - name: CASE_ID
+    expr: CASE_ID
+    data_type: VARCHAR
+    description: Associated investigation case identifier
+  - name: EXPLANATION
+    expr: EXPLANATION
+    data_type: VARCHAR
+    description: Detailed explanation of the alert trigger
+  time_dimensions:
+  - name: ALERT_TS
+    expr: ALERT_TS
+    data_type: TIMESTAMP_TZ
+    description: Alert generation timestamp
+  facts:
+  - name: SCORE
+    expr: SCORE
+    data_type: NUMBER
+    description: Model-generated alert risk score from 0 to 100
+- name: CUSTOMERS
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: CUSTOMERS
+  primary_key:
+    columns:
+    - CUSTOMER_ID
+  dimensions:
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+    description: Unique customer identifier
+  - name: NAME
+    expr: NAME
+    data_type: VARCHAR
+    description: Customer full name
+  - name: _TYPE
+    expr: '"TYPE"'
+    data_type: VARCHAR
+  - name: PAN
+    expr: PAN
+    data_type: VARCHAR
+  - name: CITY
+    expr: CITY
+    data_type: VARCHAR
+    description: Customer city of residence or registration
+  - name: KYC_STATUS
+    expr: KYC_STATUS
+    data_type: VARCHAR
+    description: 'KYC verification status: verified, partial, expired'
+  - name: PEP
+    expr: PEP
+    data_type: BOOLEAN
+    description: Whether the customer is a Politically Exposed Person
+  - name: RISK_RATING
+    expr: RISK_RATING
+    data_type: VARCHAR
+    description: 'Customer risk rating: low, medium, high, critical'
+  - name: OCCUPATION
+    expr: OCCUPATION
+    data_type: VARCHAR
+    description: Customer declared occupation or business type
+  time_dimensions:
+  - name: ONBOARDING_DATE
+    expr: ONBOARDING_DATE
+    data_type: DATE
+    description: Date the customer was onboarded
+- name: LIQUIDITY_DAILY
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: LIQUIDITY_DAILY
+  dimensions: []
+  time_dimensions:
+  - name: AS_OF
+    expr: AS_OF
+    data_type: DATE
+    description: Business date for the liquidity observation
+  facts:
+  - name: LCR_PCT
+    expr: LCR_PCT
+    data_type: FLOAT
+    description: Liquidity Coverage Ratio as a percentage. Regulatory floor is 100%
+  - name: NSFR_PCT
+    expr: NSFR_PCT
+    data_type: FLOAT
+    description: Net Stable Funding Ratio as a percentage. Regulatory floor is 100%
+  - name: HQLA_INR_CR
+    expr: HQLA_INR_CR
+    data_type: FLOAT
+    description: High Quality Liquid Assets in crores of INR
+  - name: WHOLESALE_RUNOFF_INR_CR
+    expr: WHOLESALE_RUNOFF_INR_CR
+    data_type: FLOAT
+    description: Wholesale funding runoff in crores of INR over 30-day stress window
+  - name: BUFFER_DAYS
+    expr: BUFFER_DAYS
+    data_type: NUMBER
+    description: Number of days of HQLA coverage under a 30-day stress scenario
+- name: CREDIT_EXPOSURES
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: CREDIT_EXPOSURES
+  primary_key:
+    columns:
+    - CUSTOMER_ID
+  dimensions:
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+    description: Borrower identifier in the credit book
+  - name: CUSTOMER_NAME
+    expr: CUSTOMER_NAME
+    data_type: VARCHAR
+    description: Borrower name
+  - name: SECTOR
+    expr: SECTOR
+    data_type: VARCHAR
+    description: 'Economic sector: CRE, INFRA, MANUFACTURING, MSME, AGRICULTURE, SERVICES, NBFC_LENDING, RETAIL'
+  facts:
+  - name: EXPOSURE_INR
+    expr: EXPOSURE_INR
+    data_type: NUMBER
+    description: Credit exposure amount in Indian Rupees
+relationships:
+- name: TRANSACTIONS_TO_CUSTOMERS
+  left_table: TRANSACTIONS
+  right_table: CUSTOMERS
+  join_type: inner
+  relationship_type: many_to_one
+  relationship_columns:
+  - left_column: CUSTOMER_ID
+    right_column: CUSTOMER_ID
+- name: ALERTS_TO_CUSTOMERS
+  left_table: ALERTS
+  right_table: CUSTOMERS
+  join_type: inner
+  relationship_type: many_to_one
+  relationship_columns:
+  - left_column: CUSTOMER_ID
+    right_column: CUSTOMER_ID
+verified_queries:
+- name: 0;1
+  question: What are the highest-risk open alerts and which customers are associated with them?
+  sql: SELECT a.ALERT_ID, a.TYPOLOGY, a.SCORE, a.STATUS, c.NAME AS customer_name FROM alerts AS a JOIN customers AS c ON a.CUSTOMER_ID = c.CUSTOMER_ID WHERE a.STATUS IN ('open', 'investigating', 'escalated')
+    ORDER BY a.SCORE DESC
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 1;1
+  question: How many fraud transactions are there and what is their total amount?
+  sql: SELECT COUNT(*) AS fraud_transaction_count, SUM(AMOUNT_INR) AS fraud_transaction_amount FROM transactions WHERE IS_FRAUD = TRUE
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 2;1
+  question: What are the details of all structuring transactions?
+  sql: SELECT TXN_ID, TXN_TS, CHANNEL, TXN_TYPE, AMOUNT_INR, COUNTERPARTY, NARRATIVE FROM transactions WHERE TYPOLOGY = 'structuring' ORDER BY TXN_TS
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 3;1
+  question: What is the total credit exposure by sector?
+  sql: SELECT SECTOR, COUNT(*) AS borrower_count, SUM(EXPOSURE_INR) AS total_exposure FROM credit_exposures GROUP BY SECTOR ORDER BY total_exposure DESC
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 4;1
+  question: Which borrowers have the largest credit exposures?
+  sql: SELECT CUSTOMER_NAME, EXPOSURE_INR, SECTOR FROM credit_exposures ORDER BY EXPOSURE_INR DESC LIMIT 10
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 5;1
+  question: What is the composition of our credit exposure portfolio by customer?
+  sql: SELECT CUSTOMER_NAME, EXPOSURE_INR, ROUND(EXPOSURE_INR * 100.0 / SUM(EXPOSURE_INR) OVER (), 2) AS pct_of_book FROM credit_exposures ORDER BY EXPOSURE_INR DESC
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 6;1
+  question: What were the daily liquidity metrics including LCR, NSFR, and high quality liquid assets for August 2026?
+  sql: SELECT AS_OF, LCR_PCT, NSFR_PCT, HQLA_INR_CR, WHOLESALE_RUNOFF_INR_CR, BUFFER_DAYS FROM liquidity_daily WHERE AS_OF BETWEEN '2026-08-01' AND '2026-08-31' ORDER BY AS_OF
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 7;1
+  question: What were the minimum, maximum, and average liquidity coverage ratios in August 2026?
+  sql: SELECT MIN(LCR_PCT) AS minimum_lcr, MAX(LCR_PCT) AS maximum_lcr, AVG(LCR_PCT) AS average_lcr FROM liquidity_daily WHERE AS_OF BETWEEN '2026-08-01' AND '2026-08-31'
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 8;1
+  question: What were the average liquidity coverage ratio and net stable funding ratio for August 2026?
+  sql: SELECT AVG(LCR_PCT) AS average_lcr, AVG(NSFR_PCT) AS average_nsfr FROM liquidity_daily WHERE AS_OF BETWEEN '2026-08-01' AND '2026-08-31'
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 9;1
+  question: Which customers have open high-risk alerts?
+  sql: SELECT a.ALERT_ID, a.TYPOLOGY, a.SCORE, a.STATUS, c.NAME AS customer_name, c.RISK_RATING FROM alerts AS a JOIN customers AS c ON a.CUSTOMER_ID = c.CUSTOMER_ID WHERE a.STATUS IN ('open', 'investigating',
+    'escalated') ORDER BY a.SCORE DESC
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator
+- name: 10;1
+  question: What are the different types of fraud and their financial impact ranked by total amount?
+  sql: SELECT TYPOLOGY, COUNT(*) AS transaction_count, SUM(AMOUNT_INR) AS total_amount FROM transactions WHERE IS_FRAUD = TRUE GROUP BY TYPOLOGY ORDER BY total_amount DESC
+  verified_at: 1789228567
+  verified_by: Semantic Model Generator

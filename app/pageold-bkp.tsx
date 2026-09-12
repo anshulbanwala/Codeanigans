@@ -63,18 +63,18 @@ export default function CommandCenter() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Ask Sentinel</CardTitle>
+            <CardTitle>Why this wins judges</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>Investigate risk across structured data, call evidence, and regulatory material from one natural-language question.</p>
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-foreground">Try</p>
-              <p className="rounded-lg border border-border p-2 text-xs">“Investigate Rahul Mehta&apos;s structuring concern.”</p>
-              <p className="rounded-lg border border-border p-2 text-xs">“Which exposures drive credit concentration?”</p>
-              <p className="rounded-lg border border-border p-2 text-xs">“What guidance applies to PEP enhanced monitoring?”</p>
-            </div>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>Theme 1 asked for a copilot that surfaces risk <em>and</em> produces audit-ready regulatory output from NL questions.</p>
+            <ul className="list-disc space-y-2 pl-4">
+              <li>Structured mart (txns, alerts, LCR, RWA) + unstructured (calls, circulars).</li>
+              <li>Grounded answers with SQL + clause citations — no hallucinated filings.</li>
+              <li>STR factory emits FIU-IND style packs in one click.</li>
+              <li>CoCo CLI path: semantic view, Cortex Search, Cortex Agent, custom skill.</li>
+            </ul>
             <Link href="/copilot" className="inline-block text-primary hover:underline">
-              Open Risk Copilot →
+              Open the copilot →
             </Link>
           </CardContent>
         </Card>

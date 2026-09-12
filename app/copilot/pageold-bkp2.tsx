@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,21 +18,6 @@ export default function CopilotPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!busy) {
-      setElapsedSeconds(0);
-      return;
-    }
-
-    const startedAt = Date.now();
-    const timer = window.setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [busy]);
 
   const empty = turns.length === 0;
 
@@ -61,20 +46,6 @@ export default function CopilotPage() {
 
   const last = turns.at(-1);
 
-  const groundingMessage = useMemo(() => {
-    if (elapsedSeconds < 8) return "Grounding against Sentinel data…";
-    if (elapsedSeconds < 18) return "Analyzing the available evidence…";
-    if (elapsedSeconds < 30) return "Checking relevant regulatory and investigation material…";
-    return "Preparing an evidence-backed response…";
-  }, [elapsedSeconds]);
-
-  function citationLabel(kind: string, label: string) {
-    if (kind === "sql") return { kind: "Analytics", label: "Cortex Analyst" };
-    if (label.includes("call_search")) return { kind: "Evidence", label: "Call transcripts" };
-    if (label.includes("reg_doc_search")) return { kind: "Regulation", label: "Regulatory material" };
-    return { kind, label };
-  }
-
   const graphHint = useMemo(() => {
     if (!last) return null;
     if (last.a.relatedCaseIds.includes("CASE-1088")) return "mule";
@@ -95,7 +66,7 @@ export default function CopilotPage() {
         {empty && (
           <Card>
             <CardHeader>
-              <CardTitle>Try a grounded investigation</CardTitle>
+              <CardTitle>Try a judge-ready prompt</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {suggestedPrompts.map((p) => (
@@ -138,18 +109,14 @@ export default function CopilotPage() {
                   </details>
                 )}
                 <div className="flex flex-wrap gap-2">
-                  {t.a.citations.map((c, index) => {
-                    const display = citationLabel(c.kind, c.label);
-                    return (
-                      <span
-                        key={`${c.kind}-${c.label}-${index}`}
-                        className="rounded-md border border-border px-2 py-1 text-[11px]"
-                        title={c.detail}
-                      >
-                        <span className="text-primary">{display.kind}</span> · {display.label}
-                      </span>
-                    );
-                  })}
+                  {t.a.citations.map((c, index) => (
+                    <span
+                      key={`${c.kind}-${c.label}-${index}`}
+                      className="rounded-md border border-border px-2 py-1 text-[11px]"
+                    >
+                      <span className="text-primary">{c.kind}</span> · {c.label}
+                    </span>
+                  ))}
                 </div>
                 {t.a.relatedCaseIds.length > 0 && (
                   <p className="text-xs">
@@ -170,22 +137,6 @@ export default function CopilotPage() {
             </Card>
           ))}
         </div>
-
-        {busy && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="flex items-start gap-3 py-4">
-              <span className="mt-1 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Investigating with Sentinel</p>
-                <p className="text-xs text-muted-foreground">{groundingMessage}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Cross-domain questions can take 20–45 seconds while the agent grounds the response across analytics and search.
-                  {elapsedSeconds > 0 ? ` ${elapsedSeconds}s elapsed.` : ""}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {error && (
           <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
@@ -209,7 +160,7 @@ export default function CopilotPage() {
           <div className="flex justify-between">
             <p className="text-[11px] text-muted-foreground">Logged to the audit trail with citations.</p>
             <Button type="submit" disabled={busy || !input.trim()}>
-              {busy ? "Analyzing…" : "Ask"}
+              {busy ? "Grounding…" : "Ask"}
             </Button>
           </div>
         </form>
@@ -218,25 +169,12 @@ export default function CopilotPage() {
       <aside className="flex flex-col gap-3">
         <Card>
           <CardHeader>
-            <CardTitle>How answers are grounded</CardTitle>
+            <CardTitle>Routing</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-xs text-muted-foreground">
-            <div>
-              <p className="font-medium text-foreground">Structured risk data</p>
-              <p>Transactions, alerts, customer risk, credit exposure and liquidity.</p>
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Investigation evidence</p>
-              <p>Relevant call transcripts and investigative context.</p>
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Regulatory context</p>
-              <p>Applicable AML/KYC reference material with grounded retrieval.</p>
-            </div>
-            <p className="border-t border-border pt-3">
-              Sentinel separates observed facts, regulatory evidence and interpretation.
-            </p>
-            <p className="text-[11px]">Powered by Cortex Analyst + Cortex Search.</p>
+          <CardContent className="space-y-2 text-xs text-muted-foreground">
+            <p>Metrics, counts, LCR, RWA → Cortex Analyst / semantic view.</p>
+            <p>Calls, circulars, grounds of suspicion → Cortex Search.</p>
+            <p>Live requests route through SENTINEL_COPILOT, which orchestrates the semantic view and Cortex Search services.</p>
           </CardContent>
         </Card>
         {graphHint && (
