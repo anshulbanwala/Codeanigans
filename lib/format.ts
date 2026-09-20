@@ -15,7 +15,9 @@ export function pct(value: number) {
 }
 
 export function shortDate(iso: string) {
-  return new Date(iso).toLocaleString("en-IN", {
+  const date = parseDate(iso);
+  if (!date) return "Date unavailable";
+  return date.toLocaleString("en-IN", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -24,9 +26,17 @@ export function shortDate(iso: string) {
 }
 
 export function dayOnly(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", {
+  const date = parseDate(iso);
+  if (!date) return "Date unavailable";
+  return date.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+}
+
+function parseDate(value: string | null | undefined) {
+  if (!value || value === "Invalid Date") return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }

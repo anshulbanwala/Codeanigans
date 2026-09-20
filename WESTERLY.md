@@ -65,7 +65,7 @@ Story cases: **CASE-1042** Mehta (CTR smurf) · **CASE-1088** mule trio · **CAS
 | Done | GitHub repository published; secrets remain in ignored `.env.local` |
 | Next | Certify the six prompts and record the CoCo + product demo |
 | **Not done** | Optional IBM AML sample table in Snowflake (see §4) |
-| **Not done** | Streamlit-in-Snowflake twin (nice-to-have for judges) |
+| Added | Optional Streamlit-in-Snowflake companion in `streamlit/` |
 | Out of scope | Real customer data, full PaySim 24M, training a heavy GNN |
 
 Do not rebuild the UI from scratch. Extend this.

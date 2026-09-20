@@ -53,7 +53,7 @@ cortex
 
 ## Stack
 
-Next.js 16, TypeScript, Tailwind, shadcn/ui. Snowflake objects: tables, Cortex Search, semantic view, Cortex Agent, optional Streamlit-in-Snowflake.
+Next.js 16, TypeScript, Tailwind, shadcn/ui. Snowflake objects: tables, Cortex Search, semantic view, Cortex Agent, plus an optional Snowflake-hosted Streamlit companion in `streamlit/`.
 
 All customer data is **synthetic**.
 

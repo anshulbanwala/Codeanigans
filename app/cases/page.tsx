@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cases } from "@/lib/data";
+import { dayOnly } from "@/lib/format";
 
 export default function CasesPage() {
   if (cases.length === 0) {
@@ -37,7 +38,7 @@ export default function CasesPage() {
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <p>{c.summary}</p>
                 <p className="text-xs">
-                  {c.typology} · {c.owner} · opened {c.openedOn}
+                  {c.typology} · {c.owner} · opened {dayOnly(c.openedOn)}
                 </p>
               </CardContent>
             </Card>

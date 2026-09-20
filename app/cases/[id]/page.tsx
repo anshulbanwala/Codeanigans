@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { accounts, alerts, callTranscripts, cases, customers, transactions } from "@/lib/data";
-import { inr, shortDate } from "@/lib/format";
+import { dayOnly, inr, shortDate } from "@/lib/format";
 
 export default async function CaseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,6 +28,7 @@ export default async function CaseDetail({ params }: { params: Promise<{ id: str
           <Badge>{c.severity}</Badge>
           <Badge variant="outline">{c.status.replace("_", " ")}</Badge>
           <span className="text-xs text-muted-foreground">{c.owner}</span>
+          <span className="text-xs text-muted-foreground">Opened {dayOnly(c.openedOn)}</span>
         </div>
       </div>
 
