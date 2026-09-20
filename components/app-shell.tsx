@@ -4,9 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
+  Activity,
   FileWarning,
+  Landmark,
   LayoutDashboard,
   MessageSquareText,
+  Network,
   Scale,
   Shield,
 } from "lucide-react";
@@ -16,6 +19,9 @@ import { cn } from "@/lib/utils";
 const nav = [
   { href: "/", label: "Command center", icon: LayoutDashboard },
   { href: "/copilot", label: "Risk copilot", icon: MessageSquareText },
+  { href: "/investigations", label: "Investigations", icon: Network },
+  { href: "/liquidity", label: "Liquidity", icon: Activity },
+  { href: "/credit", label: "Credit risk", icon: Landmark },
   { href: "/cases", label: "Cases", icon: FileWarning },
   { href: "/str", label: "STR factory", icon: Scale },
   { href: "/regulations", label: "Regulations", icon: BookOpen },
