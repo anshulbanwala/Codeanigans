@@ -35,7 +35,7 @@ export async function POST(request: Request) {
           toolsUsed: toolsUsed.join(", ") || undefined,
         }).catch((e) => console.error("[audit-write]", e));
 
-        return NextResponse.json(response);
+        return NextResponse.json({ ...response, toolsUsed });
       } catch (agentErr) {
         const durationMs = Date.now() - start;
         const errMsg =

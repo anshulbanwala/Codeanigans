@@ -106,4 +106,5 @@ export type CopilotResponse = {
   relatedAlertIds: string[];
   strReady?: boolean;
   confidence: "high" | "medium" | "low";
+  toolsUsed?: string[];
 };

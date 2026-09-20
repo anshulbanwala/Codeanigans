@@ -73,6 +73,12 @@ export default function CopilotPage() {
     return { kind, label };
   }
 
+  function confidenceClass(confidence: CopilotResponse["confidence"]) {
+    if (confidence === "high") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+    if (confidence === "medium") return "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300";
+    return "border-destructive/30 bg-destructive/10 text-destructive";
+  }
+
   const graphHint = useMemo(() => {
     if (!last) return null;
     if (last.a.relatedCaseIds.includes("CASE-1088")) return "mule";
@@ -114,9 +120,18 @@ export default function CopilotPage() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex gap-2">
-                  <Badge variant="outline">confidence {t.a.confidence}</Badge>
+                  <Badge variant="outline" className={confidenceClass(t.a.confidence)}>confidence {t.a.confidence}</Badge>
                   {t.a.strReady && <Badge>STR-ready</Badge>}
                 </div>
+                {t.a.toolsUsed && t.a.toolsUsed.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5" aria-label="Grounding tools used">
+                    {t.a.toolsUsed.map((tool) => (
+                      <span key={tool} className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        {tool === "risk_analytics" || tool === "system_execute_sql" ? "Cortex Analyst" : tool === "reg_doc_search" ? "Regulatory Search" : tool === "call_search" ? "Call Search" : tool}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <MarkdownAnswer content={t.a.answer} />
                 {t.a.bullets.length > 0 && !/^[-*•]\s+/m.test(t.a.answer) && (
                   <ul className="list-disc space-y-1 pl-4 text-muted-foreground">

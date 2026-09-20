@@ -5,6 +5,7 @@ import { alerts, cases, credit, liquidity } from "@/lib/data";
 import { inr, pct, shortDate } from "@/lib/format";
 import { transactions } from "@/lib/data";
 import { executeQuery } from "@/lib/snowflake";
+import { ChannelMix, LiquidityPulse, MuleNetwork } from "@/components/risk-visuals";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,17 @@ export default async function CommandCenter() {
         <Kpi title="Largest exposure" value={pct(kpis.largestExposure)} hint="share of credit book" />
       </div>
 
+      <section className="overflow-hidden rounded-2xl bg-[#0b1113] px-4 py-5 text-white shadow-2xl shadow-black/10 md:px-6 md:py-6">
+        <div className="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-200/70">Treasury watch</p>
+            <h2 className="mt-1 font-heading text-xl tracking-tight">The book is liquid, but not asleep.</h2>
+          </div>
+          <p className="max-w-xs text-xs leading-relaxed text-white/45">A compact view of the pressure signals that deserve an MLRO or ALCO conversation today.</p>
+        </div>
+        <LiquidityPulse />
+      </section>
+
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -138,6 +150,11 @@ export default async function CommandCenter() {
             </Link>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+        <ChannelMix />
+        <MuleNetwork />
       </div>
 
       <Card>

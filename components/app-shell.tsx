@@ -53,9 +53,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-svh flex-col bg-background md:flex-row">
       <aside className="border-b border-sidebar-border bg-sidebar p-3 md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-b-0 md:p-4">
         <div className="mb-3 md:mb-6">
-          <p className="font-heading text-sm tracking-wide text-primary">{INSTITUTION.product}</p>
-          <p className="text-xs text-muted-foreground">
-            by {INSTITUTION.team} · {INSTITUTION.name}
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/10">S</div>
+            <div>
+              <p className="font-heading text-sm tracking-wide text-foreground">{INSTITUTION.product}</p>
+              <p className="text-[11px] text-muted-foreground">MLRO intelligence desk</p>
+            </div>
+          </div>
+          <p className="mt-3 hidden text-[11px] leading-relaxed text-muted-foreground md:block">
+            {INSTITUTION.team} · {INSTITUTION.name}
           </p>
         </div>
         <NavLinks />
@@ -66,8 +72,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3">
           <div>
-            <p className="text-sm font-medium">Risk, fraud & regulatory intelligence</p>
-            <p className="text-xs text-muted-foreground">Live · 30 Aug 2026 · Mumbai books</p>
+            <p className="text-sm font-medium tracking-tight">Risk, fraud & regulatory intelligence</p>
+            <p className="text-xs text-muted-foreground">Live book · 30 Aug 2026 · Mumbai</p>
           </div>
           <span className="hidden rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] text-primary sm:inline">
             CoCo · Cortex Analyst · Cortex Search
