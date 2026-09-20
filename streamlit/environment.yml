@@ -1,0 +1,11 @@
+name: sentinel_streamlit
+channels:
+  - snowflake
+  - https://repo.anaconda.com/pkgs/snowflake
+  - https://repo.anaconda.com/pkgs/snowflake/label/snowflake-2025.5
+
+dependencies:
+  - python=3.11
+  - streamlit
+  - snowflake-snowpark-python
+  - pandas
