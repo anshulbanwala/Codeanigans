@@ -117,7 +117,11 @@ export default function AuditPage() {
   }, []);
 
   useEffect(() => {
-    fetchServer();
+    const refreshServer = () => {
+      void fetchServer();
+    };
+
+    queueMicrotask(refreshServer);
   }, [fetchServer]);
 
   const useServer = serverSource === "snowflake" && serverRows.length > 0;

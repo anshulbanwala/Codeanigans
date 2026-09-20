@@ -21,10 +21,7 @@ export default function CopilotPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
-    if (!busy) {
-      setElapsedSeconds(0);
-      return;
-    }
+    if (!busy) return;
 
     const startedAt = Date.now();
     const timer = window.setInterval(() => {
@@ -39,6 +36,7 @@ export default function CopilotPage() {
   async function ask(question: string) {
     const q = question.trim();
     if (!q) return;
+    setElapsedSeconds(0);
     setBusy(true);
     setError(null);
     try {

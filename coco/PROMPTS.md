@@ -104,3 +104,14 @@ Create a custom skill .coco/skills/str-factory/SKILL.md that, given a CASE_ID, q
 ```
 
 The skill file in this repo is already drafted at `coco/skills/str-factory/SKILL.md`.
+
+## 8. Verification record
+
+The deployed object names are:
+
+- Agent: `SENTINEL.RISK.SENTINEL_AGENT`
+- Semantic view: `SENTINEL.RISK.RISK_ANALYTICS`
+- Search services: `SENTINEL.RISK.CALL_SEARCH`, `SENTINEL.RISK.REG_DOC_SEARCH`
+- Audit table: `SENTINEL.RISK.COPILOT_AUDIT`
+
+The Next.js app uses the same agent FQN through `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`. Before recording, run the six prompts above in CoWork, then repeat at least one in `/copilot` and confirm a new row appears in `/audit`.

@@ -1,4 +1,4 @@
-# CODEANIGANS — what this is, what is left, what to do until 13 Sep
+# CODEANIGANS — current status, demo plan, and next improvements
 
 **Read this file first.** It is the only handover your co-developer needs.
 
@@ -6,7 +6,7 @@
 - Theme: **1 — Risk, Fraud and Regulatory Intelligence Copilot**
 - Team: **Codeanigans**
 - Product: **Sentinel** (NBFC: Aarohan Finance Ltd.)
-- **Prototype submission: 13 September 2026** (use this date; ignore older “1 Sep” notes elsewhere)
+- **Current checkpoint: 20 September 2026** — prototype stack is live; keep Snowflake objects available through evaluation.
 - Rubric: relevance 30% · technical execution 40% · completeness 30%
 - Support: cococlihackgcc-support@hack2skill.com
 
@@ -54,17 +54,18 @@ Story cases: **CASE-1042** Mehta (CTR smurf) · **CASE-1088** mule trio · **CAS
 
 ---
 
-## 2. What is left (honest)
+## 2. Current status
 
 | Status | Item |
 | --- | --- |
 | Done | Local demo app + narrative data + SQL sketches + CoCo prompt pack |
-| **Not done** | Load into **your Snowflake account** with hackathon credentials |
-| **Not done** | Real Cortex Search, semantic view, Cortex Agent, CoWork deploy (must be done with `cortex` CLI) |
+| Done | Snowflake schema, synthetic expansion data, Cortex Search services, semantic view, and Cortex Agent |
+| Done | Live agent `SENTINEL.RISK.SENTINEL_AGENT` wired through `DATA_AGENT_RUN` |
+| Done | Shared `APP_DEVELOPER` role access and Snowflake-backed `COPILOT_AUDIT` |
+| Done | GitHub repository published; secrets remain in ignored `.env.local` |
+| Next | Certify the six prompts and record the CoCo + product demo |
 | **Not done** | Optional IBM AML sample table in Snowflake (see §4) |
 | **Not done** | Streamlit-in-Snowflake twin (nice-to-have for judges) |
-| **Not done** | Submission pack: 3–5 min video, 1-pager, Hack2skill form |
-| **Not done** | GitHub repo + invite co-developer (see §5) |
 | Out of scope | Real customer data, full PaySim 24M, training a heavy GNN |
 
 Do not rebuild the UI from scratch. Extend this.
@@ -75,12 +76,12 @@ Do not rebuild the UI from scratch. Extend this.
 
 Split: **A** = person with Snowflake login / CoCo. **B** = co-developer (app, story, submit). Swap if needed; do not both edit `lib/engine.ts` and Snowflake objects blindly.
 
-### 30–31 Aug — unstick GitHub + warehouse
+### Completed — warehouse, agent, and repository
 
-- A: Click **Create repo** in this Cursor chat, invite B as collaborator.
-- A: `cortex` login with hackathon creds. Never commit passwords or `connections.toml`.
-- A: Run `snowflake/01_schema.sql` then `02_seed.sql`. Walk `coco/PROMPTS.md` steps 0–2 (privileges + generate more synthetic rows).
-- B: Clone, run the app, click every page, list UI bugs in a GitHub issue.
+- Snowflake account objects are live under `SENTINEL.RISK`.
+- The canonical agent is `SENTINEL.RISK.SENTINEL_AGENT`; keep this name in CoCo, YAML, and the app.
+- The repository is published at `https://github.com/anshulbanwala/Codeanigans`.
+- Use `/api/health` to verify the app's active role and warehouse before recording.
 
 ### 1–3 Sep — data + search
 
@@ -166,16 +167,13 @@ kaggle datasets download -d ealtman2019/ibm-transactions-for-anti-money-launderi
 
 ---
 
-## 5. GitHub so you can invite a co-developer
+## 5. GitHub and shared development
 
-This agent can commit to the Cursor git remote. It **cannot** create a GitHub repo for you from here.
+The repository is published at `https://github.com/anshulbanwala/Codeanigans`.
 
-1. In this Cursor new-project chat, click **Create repo**.
-2. After it exists, Settings → Collaborators → invite your co-developer (GitHub username/email).
-3. Both clone that GitHub URL. Work on `main` or `cursor/…` branches; keep secrets out of git (`.env*` is gitignored; use `.env.example` only).
-4. If Create repo is not visible yet, publish/create from the Cursor UI, then send your co-dev the GitHub link — not the Cursor-internal git URL.
-
-Until GitHub exists, the work is already committed on `main` (`Add Sentinel, a Theme 1 risk and regulatory copilot`). After you create the GitHub repo, Cursor will attach it; pull and keep going.
+1. Settings → Collaborators → invite the co-developer by GitHub username.
+2. Both clone the GitHub URL and use short feature branches.
+3. Keep secrets out of Git: `.env*` is ignored and `.env.example` is the shareable template.
 
 ---
 
