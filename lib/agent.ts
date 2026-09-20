@@ -1,7 +1,7 @@
 import { executeQuery } from "@/lib/snowflake";
 import type { CopilotResponse, CopilotCitation } from "@/lib/types";
 
-const AGENT_FQN = "SENTINEL.RISK.SENTINEL_COPILOT";
+const AGENT_FQN = "SENTINEL.RISK.SENTINEL_AGENT";
 
 type AgentContentBlock =
   | { type: "text"; text: string }

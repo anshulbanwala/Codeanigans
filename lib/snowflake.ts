@@ -12,6 +12,7 @@ function connect(): Promise<snowflake.Connection> {
   const account = process.env.SNOWFLAKE_ACCOUNT;
   const username = process.env.SNOWFLAKE_USER;
   const password = process.env.SNOWFLAKE_PASSWORD;
+  const role = process.env.SNOWFLAKE_ROLE ?? "APP_DEVELOPER";
   const database = process.env.SNOWFLAKE_DATABASE ?? "SENTINEL";
   const schema = process.env.SNOWFLAKE_SCHEMA ?? "RISK";
   const warehouse = process.env.SNOWFLAKE_WAREHOUSE ?? "SENTINEL_WH";
@@ -28,6 +29,7 @@ function connect(): Promise<snowflake.Connection> {
     account,
     username,
     password,
+    role,
     database,
     schema,
     warehouse,
