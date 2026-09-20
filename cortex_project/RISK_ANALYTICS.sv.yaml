@@ -214,6 +214,165 @@ tables:
     expr: EXPOSURE_INR
     data_type: NUMBER
     description: Credit exposure amount in Indian Rupees
+- name: TRANSACTION_FEATURES
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: TRANSACTION_FEATURES
+  primary_key:
+    columns:
+    - TXN_ID
+  dimensions:
+  - name: TXN_ID
+    expr: TXN_ID
+    data_type: VARCHAR
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+  - name: CHANNEL
+    expr: CHANNEL
+    data_type: VARCHAR
+  - name: TYPOLOGY
+    expr: TYPOLOGY
+    data_type: VARCHAR
+  - name: NIGHT_TRANSACTION_FLAG
+    expr: NIGHT_TRANSACTION_FLAG
+    data_type: BOOLEAN
+  - name: WEEKEND_FLAG
+    expr: WEEKEND_FLAG
+    data_type: BOOLEAN
+  facts:
+  - name: ANOMALY_SCORE
+    expr: ANOMALY_SCORE
+    data_type: NUMBER
+  - name: CASH_VELOCITY
+    expr: CASH_VELOCITY
+    data_type: NUMBER
+  - name: TRANSACTIONS_LAST_HOUR
+    expr: TRANSACTIONS_LAST_HOUR
+    data_type: NUMBER
+- name: CUSTOMER_BEHAVIOR_PROFILE
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: CUSTOMER_BEHAVIOR_PROFILE
+  primary_key:
+    columns:
+    - CUSTOMER_ID
+  dimensions:
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+  facts:
+  - name: AVG_TRANSACTION_AMOUNT
+    expr: AVG_TRANSACTION_AMOUNT
+    data_type: NUMBER
+  - name: AVG_MONTHLY_VOLUME
+    expr: AVG_MONTHLY_VOLUME
+    data_type: NUMBER
+  - name: AVG_CASH_RATIO
+    expr: AVG_CASH_RATIO
+    data_type: FLOAT
+  - name: AVG_UPI_RATIO
+    expr: AVG_UPI_RATIO
+    data_type: FLOAT
+  - name: AVG_COUNTERPARTIES
+    expr: AVG_COUNTERPARTIES
+    data_type: NUMBER
+- name: CREDIT_CONCENTRATION_VIEW
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: CREDIT_CONCENTRATION_VIEW
+  primary_key:
+    columns:
+    - CUSTOMER_ID
+  dimensions:
+  - name: CUSTOMER_ID
+    expr: CUSTOMER_ID
+    data_type: VARCHAR
+  - name: CUSTOMER_NAME
+    expr: CUSTOMER_NAME
+    data_type: VARCHAR
+  - name: SECTOR
+    expr: SECTOR
+    data_type: VARCHAR
+  - name: TOP10_EXPOSURE
+    expr: TOP10_EXPOSURE
+    data_type: BOOLEAN
+  facts:
+  - name: EXPOSURE_INR
+    expr: EXPOSURE_INR
+    data_type: NUMBER
+  - name: PCT_OF_BOOK
+    expr: PCT_OF_BOOK
+    data_type: FLOAT
+- name: LIQUIDITY_STRESS_VIEW
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: LIQUIDITY_STRESS_VIEW
+  primary_key:
+    columns:
+    - AS_OF
+  time_dimensions:
+  - name: AS_OF
+    expr: AS_OF
+    data_type: DATE
+  dimensions:
+  - name: BREACH_FLAG
+    expr: BREACH_FLAG
+    data_type: BOOLEAN
+  facts:
+  - name: LCR_PCT
+    expr: LCR_PCT
+    data_type: FLOAT
+  - name: NSFR_PCT
+    expr: NSFR_PCT
+    data_type: FLOAT
+  - name: ROLLING_AVG_LCR
+    expr: ROLLING_AVG_LCR
+    data_type: FLOAT
+  - name: STRESS_GAP
+    expr: STRESS_GAP
+    data_type: FLOAT
+- name: CASE_EVIDENCE
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: CASE_EVIDENCE
+  dimensions:
+  - name: CASE_ID
+    expr: CASE_ID
+    data_type: VARCHAR
+  - name: EVIDENCE_TYPE
+    expr: EVIDENCE_TYPE
+    data_type: VARCHAR
+  - name: REFERENCE_ID
+    expr: REFERENCE_ID
+    data_type: VARCHAR
+  - name: DESCRIPTION
+    expr: DESCRIPTION
+    data_type: VARCHAR
+- name: ENTITY_RELATIONSHIPS
+  base_table:
+    database: SENTINEL
+    schema: RISK
+    table: ENTITY_RELATIONSHIPS
+  dimensions:
+  - name: FROM_ENTITY
+    expr: FROM_ENTITY
+    data_type: VARCHAR
+  - name: TO_ENTITY
+    expr: TO_ENTITY
+    data_type: VARCHAR
+  - name: RELATIONSHIP
+    expr: RELATIONSHIP
+    data_type: VARCHAR
+  facts:
+  - name: WEIGHT
+    expr: WEIGHT
+    data_type: FLOAT
 relationships:
 - name: TRANSACTIONS_TO_CUSTOMERS
   left_table: TRANSACTIONS
@@ -258,6 +417,106 @@ verified_queries:
   sql: SELECT CUSTOMER_NAME, EXPOSURE_INR, SECTOR FROM credit_exposures ORDER BY EXPOSURE_INR DESC LIMIT 10
   verified_at: 1789228567
   verified_by: Semantic Model Generator
+- name: 5;1
+  question: Which customers have the highest transaction velocity?
+  sql: SELECT CUSTOMER_ID, MAX(TRANSACTIONS_LAST_HOUR) AS transactions_last_hour FROM transaction_features GROUP BY CUSTOMER_ID ORDER BY transactions_last_hour DESC LIMIT 10
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 6;1
+  question: Show related-party transactions.
+  sql: SELECT TXN_ID, CUSTOMER_ID, COUNTERPARTY, AMOUNT_INR, TXN_TS FROM transactions WHERE TYPOLOGY = 'round_trip' ORDER BY TXN_TS
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 7;1
+  question: Which customers have unusual night transactions?
+  sql: SELECT CUSTOMER_ID, COUNT(*) AS night_transactions, SUM(AMOUNT_INR) AS night_amount FROM transaction_features WHERE NIGHT_TRANSACTION_FLAG = TRUE GROUP BY CUSTOMER_ID ORDER BY night_transactions DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 8;1
+  question: Which customers use shared devices?
+  sql: SELECT FROM_ENTITY AS customer_id, COUNT(*) AS linked_devices FROM entity_relationships WHERE RELATIONSHIP = 'shares_device' GROUP BY FROM_ENTITY ORDER BY linked_devices DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 9;1
+  question: Show alerts by city.
+  sql: SELECT c.CITY, COUNT(*) AS alert_count, AVG(a.SCORE) AS average_score FROM alerts a JOIN customers c ON a.CUSTOMER_ID = c.CUSTOMER_ID GROUP BY c.CITY ORDER BY alert_count DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 10;1
+  question: Which merchants appear in fraud typologies?
+  sql: SELECT COUNTERPARTY, COUNT(*) AS fraud_transactions, SUM(AMOUNT_INR) AS fraud_amount FROM transactions WHERE IS_FRAUD = TRUE GROUP BY COUNTERPARTY ORDER BY fraud_amount DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 11;1
+  question: What is exposure by rating?
+  sql: SELECT c.RISK_RATING, COUNT(*) AS customer_count, SUM(e.EXPOSURE_INR) AS exposure FROM credit_exposures e LEFT JOIN customers c ON e.CUSTOMER_ID = c.CUSTOMER_ID GROUP BY c.RISK_RATING ORDER BY exposure DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 12;1
+  question: Show LCR stress over the last 30 days.
+  sql: SELECT AS_OF, LCR_PCT, ROLLING_AVG_LCR, STRESS_GAP, BREACH_FLAG FROM liquidity_stress_view ORDER BY AS_OF DESC LIMIT 30
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 13;1
+  question: Which are the top CRE borrowers?
+  sql: SELECT CUSTOMER_NAME, EXPOSURE_INR, PCT_OF_BOOK FROM credit_concentration_view WHERE SECTOR = 'CRE' ORDER BY EXPOSURE_INR DESC LIMIT 10
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 14;1
+  question: Summarize PEP transactions.
+  sql: SELECT c.NAME, COUNT(t.TXN_ID) AS transaction_count, SUM(t.AMOUNT_INR) AS transaction_amount FROM customers c JOIN transactions t ON c.CUSTOMER_ID = t.CUSTOMER_ID WHERE c.PEP = TRUE GROUP BY c.NAME ORDER BY transaction_amount DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 15;1
+  question: Show the mule network timeline.
+  sql: SELECT TXN_TS, CUSTOMER_ID, COUNTERPARTY, CHANNEL, TXN_TYPE, AMOUNT_INR FROM transactions WHERE TYPOLOGY = 'mule' ORDER BY TXN_TS
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 16;1
+  question: Which transactions are cash funnel activity?
+  sql: SELECT TXN_ID, CUSTOMER_ID, TXN_TS, AMOUNT_INR, CHANNEL, NARRATIVE FROM transactions WHERE TYPOLOGY = 'cash_funnel' ORDER BY TXN_TS
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 17;1
+  question: What is the fraud rate by payment channel?
+  sql: SELECT CHANNEL, COUNT_IF(IS_FRAUD) / NULLIF(COUNT(*), 0) AS fraud_rate, SUM(IFF(IS_FRAUD, AMOUNT_INR, 0)) AS fraud_amount FROM transactions GROUP BY CHANNEL ORDER BY fraud_rate DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 18;1
+  question: Which open alerts are critical?
+  sql: SELECT ALERT_ID, CUSTOMER_ID, TYPOLOGY, SCORE, CASE_ID FROM alerts WHERE STATUS IN ('open', 'investigating', 'escalated') AND SCORE >= 90 ORDER BY SCORE DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 19;1
+  question: Which cases have the most evidence?
+  sql: SELECT CASE_ID, COUNT(*) AS evidence_count FROM case_evidence GROUP BY CASE_ID ORDER BY evidence_count DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 20;1
+  question: Which customers have a high cash ratio?
+  sql: SELECT CUSTOMER_ID, AVG_CASH_RATIO, AVG_TRANSACTION_AMOUNT FROM customer_behavior_profile WHERE AVG_CASH_RATIO >= 0.25 ORDER BY AVG_CASH_RATIO DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 21;1
+  question: What are the largest sector concentrations?
+  sql: SELECT SECTOR, SUM(EXPOSURE_INR) AS sector_exposure, MAX(PCT_OF_BOOK) AS largest_borrower_pct FROM credit_concentration_view GROUP BY SECTOR ORDER BY sector_exposure DESC
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 22;1
+  question: Which transactions happened after midnight?
+  sql: SELECT TXN_ID, CUSTOMER_ID, TXN_TS, AMOUNT_INR, CHANNEL FROM transaction_features WHERE NIGHT_TRANSACTION_FLAG = TRUE ORDER BY TXN_TS
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 23;1
+  question: Which customers have multiple counterparties?
+  sql: SELECT CUSTOMER_ID, AVG_COUNTERPARTIES FROM customer_behavior_profile ORDER BY AVG_COUNTERPARTIES DESC LIMIT 20
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
+- name: 24;1
+  question: What is the current minimum LCR?
+  sql: SELECT AS_OF, LCR_PCT, ROLLING_AVG_LCR, BREACH_FLAG FROM liquidity_stress_view QUALIFY ROW_NUMBER() OVER (ORDER BY AS_OF DESC) = 1
+  verified_at: 1789920000
+  verified_by: Sentinel verification suite
 - name: 5;1
   question: What is the composition of our credit exposure portfolio by customer?
   sql: SELECT CUSTOMER_NAME, EXPOSURE_INR, ROUND(EXPOSURE_INR * 100.0 / SUM(EXPOSURE_INR) OVER (), 2) AS pct_of_book FROM credit_exposures ORDER BY EXPOSURE_INR DESC

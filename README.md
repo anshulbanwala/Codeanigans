@@ -34,9 +34,10 @@ Suggested demo path: Command center → Copilot (mule + CTR prompts) → case CA
 
 1. Log in with the hackathon credentials (never commit them).
 2. Run `snowflake/01_schema.sql`.
-3. Run `snowflake/02_seed.sql` and `snowflake/03_expand.sql` when the account needs the seeded story volume.
-4. Install CoCo CLI and walk `coco/PROMPTS.md` in order.
-5. Copy `coco/skills/str-factory/SKILL.md` into your CoCo skills folder if you want the custom skill on the recording.
+3. Run `snowflake/02_seed.sql` and `snowflake/03_expand.sql` for the foundation story data.
+4. Run `snowflake/04_winner_expansion.sql` for additive customers, transactions, evidence graph tables, feature views, and Analyst verification surfaces.
+5. Install CoCo CLI and walk `coco/PROMPTS.md` in order.
+6. Copy `coco/skills/str-factory/SKILL.md` into your CoCo skills folder if you want the custom skill on the recording.
 
 Install CoCo:
 

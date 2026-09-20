@@ -43,6 +43,8 @@ Add:
 Enable change tracking on CALL_TRANSCRIPTS and REG_DOCS.
 ```
 
+Run `snowflake/04_winner_expansion.sql` after the foundation scripts when the account needs the additive winner dataset. It is deterministic and idempotent for its generated IDs; it does not update or delete the original Sentinel scenarios. The script also restores `APP_DEVELOPER` grants after agent/semantic deployments.
+
 ## 2. Cortex Search
 
 ```

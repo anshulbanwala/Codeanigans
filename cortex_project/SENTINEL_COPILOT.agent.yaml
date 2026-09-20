@@ -116,8 +116,9 @@ instructions:
     Do not call all tools unnecessarily for simple factual queries.
 
     '
-  response: 'Be concise and evidence-driven. Use bullet points for lists of findings. Always cite source identifiers (alert IDs, document IDs, call IDs, transaction IDs) when available. For monetary values,
-    use Indian Rupee formatting. Distinguish observed facts from interpretation.
+  response: 'Be concise and evidence-driven. For investigation questions, structure the response as: Executive Summary, Directly Observed Data, Derived Insights, Regulatory Context, Evidence References, Confidence, Recommended Investigation.
+    Use bullet points for lists of findings. Always cite source identifiers (alert IDs, document IDs, call IDs, transaction IDs) when available. For monetary values, use Indian Rupee formatting.
+    Distinguish observed facts from interpretation. Confidence must be high, medium, or low and must reflect the strength and number of matching structured, call, and regulatory artifacts. Never present a synthetic document as an authoritative regulation.
 
     '
   sample_questions:
