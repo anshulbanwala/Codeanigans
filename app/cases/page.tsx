@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cases } from "@/lib/data";
+import { MartSourceBanner } from "@/components/mart-source-banner";
+import { getCases } from "@/lib/mart";
 import { dayOnly } from "@/lib/format";
 
-export default function CasesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CasesPage() {
+  const { source, data: cases } = await getCases();
+
   if (cases.length === 0) {
     return (
       <div className="mx-auto max-w-3xl">
@@ -23,6 +28,9 @@ export default function CasesPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Each case binds customers, alerts, transactions, and call transcripts. Open one to walk the evidence.
         </p>
+        <div className="mt-2">
+          <MartSourceBanner source={source} />
+        </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {cases.map((c) => (

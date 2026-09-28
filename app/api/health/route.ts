@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { executeQuery } from "@/lib/snowflake";
+import { warmupSnowflake } from "@/lib/warmup";
 
 const agentFqn = "SENTINEL.RISK.SENTINEL_AGENT";
 
@@ -20,6 +21,7 @@ export async function GET() {
   }
 
   try {
+    await warmupSnowflake();
     const rows = await executeQuery<{
       CURRENT_ROLE: string;
       CURRENT_DATABASE: string;

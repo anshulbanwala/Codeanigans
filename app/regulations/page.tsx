@@ -1,7 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { regulations } from "@/lib/data";
+import { MartSourceBanner } from "@/components/mart-source-banner";
+import { getRegulations } from "@/lib/mart";
 
-export default function RegulationsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function RegulationsPage() {
+  const { source, data: regulations } = await getRegulations();
+
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-4">
       <div>
@@ -9,6 +14,9 @@ export default function RegulationsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Chunked circulars indexed as Cortex Search would be. The copilot cites these clauses instead of inventing law.
         </p>
+        <div className="mt-2">
+          <MartSourceBanner source={source} />
+        </div>
       </div>
       {regulations.map((doc) => (
         <Card key={doc.id}>

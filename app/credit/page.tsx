@@ -1,16 +1,29 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { credit, customers } from "@/lib/data";
+import { MartSourceBanner } from "@/components/mart-source-banner";
+import { getCreditMetrics, getCustomers } from "@/lib/mart";
 import { pct } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
 
 const sectors = [
   ["CRE", 34], ["MSME", 23], ["Infrastructure", 18], ["Manufacturing", 12], ["Healthcare", 8], ["Other", 5],
 ] as const;
 
-export default function CreditPage() {
+export default async function CreditPage() {
+  const [creditResult, customersResult] = await Promise.all([
+    getCreditMetrics(),
+    getCustomers(),
+  ]);
+  const credit = creditResult.data;
+  const highRiskCount = customersResult.data.filter(
+    (customer) => customer.riskRating === "high" || customer.riskRating === "critical",
+  ).length;
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
+      <MartSourceBanner source={creditResult.source} />
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Credit risk</p>
@@ -28,13 +41,13 @@ export default function CreditPage() {
 
       <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
         <Card>
-          <CardHeader><CardTitle className="text-sm">Sector shape</CardTitle><p className="text-xs text-muted-foreground">Share of total exposure</p></CardHeader>
+          <CardHeader><CardTitle className="text-sm">Sector shape</CardTitle><p className="text-xs text-muted-foreground">Share of total exposure (illustrative)</p></CardHeader>
           <CardContent className="space-y-4">
             {sectors.map(([sector, share]) => <div key={sector} className="grid grid-cols-[110px_1fr_40px] items-center gap-3 text-xs"><span className="text-muted-foreground">{sector}</span><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${share}%` }} /></div><span className="text-right font-medium">{share}%</span></div>)}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-start justify-between gap-3"><div><CardTitle className="text-sm">Borrower watchlist</CardTitle><p className="text-xs text-muted-foreground">Names to carry into the next credit committee</p></div><Badge variant="outline">{customers.filter((customer) => customer.riskRating === "high" || customer.riskRating === "critical").length} high risk names</Badge></CardHeader>
+          <CardHeader className="flex flex-row items-start justify-between gap-3"><div><CardTitle className="text-sm">Borrower watchlist</CardTitle><p className="text-xs text-muted-foreground">Names to carry into the next credit committee</p></div><Badge variant="outline">{highRiskCount} high risk names</Badge></CardHeader>
           <CardContent className="space-y-3">
             <Borrower name="Golden Peak Realty" sector="CRE" share={credit.realEstateExposurePct} tone="critical" />
             <Borrower name="Meru Logistics Pvt Ltd" sector="Logistics" share={7.8} tone="watch" />
@@ -53,5 +66,5 @@ export default function CreditPage() {
 }
 
 function Metric({ label, value, note }: { label: string; value: string; note: string }) { return <Card size="sm"><CardContent><p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p><p className="mt-2 font-heading text-2xl tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></CardContent></Card>; }
-function Borrower({ name, sector, share, tone }: { name: string; sector: string; share: number; tone: "critical" | "watch" | "normal" }) { const color = tone === "critical" ? "text-red-600 dark:text-red-300" : tone === "watch" ? "text-amber-600 dark:text-amber-300" : "text-foreground"; return <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-3"><div><p className="text-sm font-medium">{name}</p><p className="mt-1 text-xs text-muted-foreground">{sector} · exposure share</p></div><p className={`font-heading text-xl ${color}`}>{share}%</p></div>; }
+function Borrower({ name, sector, share, tone }: { name: string; sector: string; share: number; tone: "critical" | "watch" | "normal" }) { const color = tone === "critical" ? "text-red-600 dark:text-red-300" : tone === "watch" ? "text-amber-600 dark:text-amber-300" : "text-foreground"; return <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-3"><div><p className="text-sm font-medium">{name}</p><p className="mt-1 text-xs text-muted-foreground">{sector} · exposure share</p></div><p className={`font-heading text-xl ${color}`}>{pct(share)}</p></div>; }
 function Readout({ title, text }: { title: string; text: string }) { return <div><p className="text-xs font-medium uppercase tracking-wide text-primary">{title}</p><p className="mt-2 leading-relaxed text-muted-foreground">{text}</p></div>; }

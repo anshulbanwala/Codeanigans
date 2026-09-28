@@ -107,4 +107,8 @@ export type CopilotResponse = {
   strReady?: boolean;
   confidence: "high" | "medium" | "low";
   toolsUsed?: string[];
+  engine?: "agent" | "local-fallback" | "local";
+  auditLogged?: boolean;
+  agentError?: string;
+  cacheHit?: boolean;
 };

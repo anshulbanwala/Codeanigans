@@ -2,22 +2,44 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { accounts, alerts, callTranscripts, cases, customers, transactions } from "@/lib/data";
+import { MartSourceBanner } from "@/components/mart-source-banner";
+import {
+  getAccountsForCustomers,
+  getAlerts,
+  getCallsForCustomers,
+  getCaseById,
+  getCustomers,
+  getTransactionsForCase,
+} from "@/lib/mart";
 import { dayOnly, inr, shortDate } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
 
 export default async function CaseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const c = cases.find((x) => x.id === id);
+  const caseResult = await getCaseById(id);
+  const c = caseResult.data;
   if (!c) notFound();
 
-  const people = customers.filter((p) => c.customerIds.includes(p.id));
-  const accts = accounts.filter((a) => c.customerIds.includes(a.customerId));
-  const txs = transactions.filter((t) => accts.some((a) => a.id === t.accountId));
-  const relatedAlerts = alerts.filter((a) => a.caseId === c.id);
-  const calls = callTranscripts.filter((t) => c.customerIds.includes(t.customerId));
+  const [customersResult, accountsResult, txResult, callsResult, alertsResult] =
+    await Promise.all([
+      getCustomers(),
+      getAccountsForCustomers(c.customerIds),
+      getTransactionsForCase(id, c.customerIds),
+      getCallsForCustomers(c.customerIds),
+      getAlerts(200),
+    ]);
+
+  const people = customersResult.data.filter((p) => c.customerIds.includes(p.id));
+  const accts = accountsResult.data;
+  const txs = txResult.data;
+  const calls = callsResult.data;
+  const relatedAlerts = alertsResult.data.filter((a) => a.caseId === c.id);
+  const source = caseResult.source;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-4">
+      <MartSourceBanner source={source} />
       <div>
         <Link href="/cases" className="text-xs text-primary hover:underline">
           ← Cases
@@ -45,6 +67,12 @@ export default async function CaseDetail({ params }: { params: Promise<{ id: str
           </Card>
         ))}
       </div>
+
+      {accts.some((a) => a.status === "frozen") && (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          Account freeze applied on linked wallet/savings nodes (mart status: frozen).
+        </p>
+      )}
 
       <Card>
         <CardHeader>
@@ -87,7 +115,7 @@ export default async function CaseDetail({ params }: { params: Promise<{ id: str
       ))}
 
       <div className="flex gap-3 text-sm">
-        <Link href="/str" className="text-primary hover:underline">
+        <Link href={`/str?caseId=${c.id}`} className="text-primary hover:underline">
           Generate STR pack →
         </Link>
         <Link href="/copilot" className="text-primary hover:underline">

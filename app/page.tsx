@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { alerts, cases, credit, liquidity } from "@/lib/data";
+import { alerts as localAlerts, credit, liquidity, transactions } from "@/lib/data";
 import { inr, pct, shortDate } from "@/lib/format";
-import { transactions } from "@/lib/data";
 import { executeQuery } from "@/lib/snowflake";
 import { ChannelMix, LiquidityPulse, MuleNetwork } from "@/components/risk-visuals";
+import {
+  getCases,
+  getFraudChannelTotals,
+  getLiquidityLatest,
+  getOpenAlertsForDashboard,
+} from "@/lib/mart";
+import { MartSourceBanner } from "@/components/mart-source-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +31,7 @@ async function readLiveKpis(): Promise<LiveKpis> {
       process.env.SNOWFLAKE_PASSWORD,
   );
   const local = {
-    openAlerts: alerts.filter((a) => a.status !== "closed").length,
+    openAlerts: localAlerts.filter((a) => a.status !== "closed").length,
     fraudVolume: transactions.filter((t) => t.isFraud).reduce((s, t) => s + t.amountInr, 0),
     lcrPct: liquidity.lcrPct,
     bufferDays: liquidity.bufferDays,
@@ -72,6 +78,22 @@ function severityClass(s: string) {
 
 export default async function CommandCenter() {
   const kpis = await readLiveKpis();
+  const [alertsResult, casesResult, channelsResult, liquidityResult] = await Promise.all([
+    getOpenAlertsForDashboard(),
+    getCases(),
+    getFraudChannelTotals(),
+    getLiquidityLatest(),
+  ]);
+  const alerts = alertsResult.data;
+  const heroIds = ["CASE-1042", "CASE-1088", "CASE-1101", "CASE-1115"];
+  const heroCases = casesResult.data.filter((c) => heroIds.includes(c.id));
+  const cases = heroCases.length ? heroCases : casesResult.data.slice(0, 6);
+  const pageSource =
+    alertsResult.source === "snowflake" ||
+    casesResult.source === "snowflake" ||
+    kpis.source === "snowflake"
+      ? "snowflake"
+      : "local";
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -81,8 +103,9 @@ export default async function CommandCenter() {
           Aarohan Finance (NBFC) — live fraud, credit concentration, and liquidity in one pane.
           Ask the copilot in plain English; every answer is cited and audit-logged.
         </p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          KPI source: <span className="font-medium text-foreground">{kpis.source === "snowflake" ? "Snowflake SENTINEL.RISK" : "local synthetic fallback"}</span>
+        <MartSourceBanner source={pageSource} />
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+          Data: synthetic Aarohan mart in Snowflake (CoCo-generated expansion). Unstructured: RM call transcripts and RBI/PMLA/FIU clause chunks. No production PII.
         </p>
       </div>
 
@@ -101,7 +124,7 @@ export default async function CommandCenter() {
           </div>
           <p className="max-w-xs text-xs leading-relaxed text-white/45">A compact view of the pressure signals that deserve an MLRO or ALCO conversation today.</p>
         </div>
-        <LiquidityPulse />
+        <LiquidityPulse snapshot={liquidityResult.data} />
       </section>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -153,7 +176,7 @@ export default async function CommandCenter() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
-        <ChannelMix />
+        <ChannelMix channels={channelsResult.data} />
         <MuleNetwork />
       </div>
 

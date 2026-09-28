@@ -26,6 +26,7 @@ type NormalizedRow = {
   at: string;
   user: string;
   question: string;
+  answer?: string;
   confidence: string;
   citations: string;
   sql?: string;
@@ -42,6 +43,7 @@ function normalizeServer(r: ServerRow): NormalizedRow {
     at: r.ASKED_AT,
     user: r.USER_NAME ?? "unknown",
     question: r.QUESTION,
+    answer: r.ANSWER ?? undefined,
     confidence: r.CONFIDENCE ?? "unknown",
     citations: r.CITATIONS ?? "",
     sql: r.SQL_TEXT ?? undefined,
@@ -59,6 +61,7 @@ function normalizeLocal(r: AuditRow): NormalizedRow {
     at: r.at,
     user: r.user,
     question: r.question,
+    answer: undefined,
     confidence: r.confidence,
     citations: r.citations.join(", "),
     sql: r.sql,
@@ -89,7 +92,7 @@ export default function AuditPage() {
         return;
       }
       const data = (await res.json()) as { rows: ServerRow[]; source: string };
-      if (data.source === "snowflake" && data.rows.length > 0) {
+      if (data.source === "snowflake") {
         setServerRows(data.rows.map(normalizeServer));
         setServerSource("snowflake");
       } else {
@@ -124,7 +127,7 @@ export default function AuditPage() {
     queueMicrotask(refreshServer);
   }, [fetchServer]);
 
-  const useServer = serverSource === "snowflake" && serverRows.length > 0;
+  const useServer = serverSource === "snowflake";
   const rows: NormalizedRow[] = useServer
     ? serverRows
     : localRows.map(normalizeLocal);
@@ -175,7 +178,17 @@ export default function AuditPage() {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-1 text-xs text-muted-foreground">
+            <CardContent className="space-y-2 text-xs text-muted-foreground">
+              {r.answer && (
+                <details className="rounded-md border border-border bg-muted/20">
+                  <summary className="cursor-pointer px-2 py-1.5 text-[11px] font-medium text-foreground">
+                    Answer replay
+                  </summary>
+                  <p className="border-t border-border px-2 py-2 text-xs leading-relaxed text-foreground">
+                    {r.answer}
+                  </p>
+                </details>
+              )}
               {r.citations && <p>Citations: {r.citations}</p>}
               {r.toolsUsed && <p>Tools: {r.toolsUsed}</p>}
               {r.errorMessage && (

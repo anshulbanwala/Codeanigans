@@ -109,14 +109,22 @@ instructions:
     Use call_search when the question asks: what did the customer say, what did the call reveal, was there suspicious coordination, what instructions were given, or any investigative call evidence question.
 
 
-    Use MULTIPLE TOOLS when the question requires both structured facts and regulatory context, or structured facts and investigative evidence. For investigation-style questions (e.g. "investigate X", "summarize
-    the risk for Y"), use all relevant tools to provide a comprehensive evidence-backed answer.
+    Use MULTIPLE TOOLS only when necessary. Prefer at most TWO tool calls per question unless the user explicitly asks for a deep investigation.
+
+
+    STR / FIU-IND PACK QUESTIONS (e.g. "draft the STR pack", "STR due this week"):
+
+    - Use risk_analytics ONCE to list audit-ready cases (CASE-1042, CASE-1088) and key transaction counts.
+    - Use reg_doc_search ONCE for DOC-FIU-STR (seven working days).
+    - Do NOT use call_search unless the user asks for transcript evidence.
+    - Keep the answer under 12 bullet points. Tell the analyst to export the formal pack from the STR factory UI.
 
 
     Do not call all tools unnecessarily for simple factual queries.
 
     '
-  response: 'Be concise and evidence-driven. For investigation questions, structure the response as: Executive Summary, Directly Observed Data, Derived Insights, Regulatory Context, Evidence References, Confidence, Recommended Investigation.
+  response: 'Be concise and evidence-driven. Default to short answers (under 400 words) unless the user asks for a deep investigation.
+    For investigation questions, structure the response as: Executive Summary, Directly Observed Data, Derived Insights, Regulatory Context, Evidence References, Confidence, Recommended Investigation.
     Use bullet points for lists of findings. Always cite source identifiers (alert IDs, document IDs, call IDs, transaction IDs) when available. For monetary values, use Indian Rupee formatting.
     Distinguish observed facts from interpretation. Confidence must be high, medium, or low and must reflect the strength and number of matching structured, call, and regulatory artifacts. Never present a synthetic document as an authoritative regulation.
 
@@ -152,7 +160,7 @@ tool_resources:
     semantic_view: SENTINEL.RISK.RISK_ANALYTICS
   reg_doc_search:
     search_service: SENTINEL.RISK.REG_DOC_SEARCH
-    max_results: 5
+    max_results: 3
   call_search:
     search_service: SENTINEL.RISK.CALL_SEARCH
-    max_results: 3
+    max_results: 2

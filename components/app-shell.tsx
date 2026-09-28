@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { INSTITUTION } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { DataSourceStatus } from "@/components/data-source-status";
 
 const nav = [
   { href: "/", label: "Command center", icon: LayoutDashboard },
@@ -81,9 +82,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="text-sm font-medium tracking-tight">Risk, fraud & regulatory intelligence</p>
             <p className="text-xs text-muted-foreground">Live book · 30 Aug 2026 · Mumbai</p>
           </div>
-          <span className="hidden rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] text-primary sm:inline">
-            CoCo · Cortex Analyst · Cortex Search
-          </span>
+          <div className="flex items-center gap-2">
+            <DataSourceStatus />
+            <span className="hidden rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] text-primary sm:inline">
+              CoCo · Cortex Analyst · Cortex Search
+            </span>
+          </div>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>

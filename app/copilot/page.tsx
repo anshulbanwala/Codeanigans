@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,12 @@ import type { CopilotResponse } from "@/lib/types";
 import { appendAudit } from "@/lib/audit-client";
 import { MarkdownAnswer } from "@/components/markdown-answer";
 
-type Turn = { q: string; a: CopilotResponse };
+type Turn = {
+  id: string;
+  q: string;
+  a: CopilotResponse | null;
+  status: "pending" | "done" | "error";
+};
 
 export default function CopilotPage() {
   const [input, setInput] = useState("");
@@ -19,6 +24,15 @@ export default function CopilotPage() {
   const [error, setError] = useState<string | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const threadEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    threadEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [turns, busy]);
+
+  useEffect(() => {
+    void fetch("/api/warmup").catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!busy) return;
@@ -35,10 +49,15 @@ export default function CopilotPage() {
 
   async function ask(question: string) {
     const q = question.trim();
-    if (!q) return;
+    if (!q || busy) return;
+
+    const turnId = `turn-${Date.now()}`;
+    setInput("");
+    setError(null);
     setElapsedSeconds(0);
     setBusy(true);
-    setError(null);
+    setTurns((t) => [...t, { id: turnId, q, a: null, status: "pending" }]);
+
     try {
       const res = await fetch("/api/copilot", {
         method: "POST",
@@ -47,17 +66,28 @@ export default function CopilotPage() {
       });
       if (!res.ok) throw new Error("Copilot service returned an error.");
       const a = (await res.json()) as CopilotResponse;
-      setTurns((t) => [...t, { q, a }]);
-      appendAudit({ question: q, response: a });
-      setInput("");
+      setTurns((t) =>
+        t.map((turn) =>
+          turn.id === turnId ? { ...turn, a, status: "done" } : turn,
+        ),
+      );
+      if (!a.auditLogged) {
+        appendAudit({ question: q, response: a });
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const message = e instanceof Error ? e.message : "Something went wrong.";
+      setError(message);
+      setTurns((t) =>
+        t.map((turn) =>
+          turn.id === turnId ? { ...turn, status: "error" } : turn,
+        ),
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  const last = turns.at(-1);
+  const lastDone = [...turns].reverse().find((t) => t.status === "done" && t.a);
 
   const groundingMessage = useMemo(() => {
     if (elapsedSeconds < 8) return "Grounding against Sentinel data…";
@@ -80,11 +110,11 @@ export default function CopilotPage() {
   }
 
   const graphHint = useMemo(() => {
-    if (!last) return null;
-    if (last.a.relatedCaseIds.includes("CASE-1088")) return "mule";
-    if (last.a.relatedCaseIds.includes("CASE-1115")) return "round";
+    if (!lastDone?.a) return null;
+    if (lastDone.a.relatedCaseIds.includes("CASE-1088")) return "mule";
+    if (lastDone.a.relatedCaseIds.includes("CASE-1115")) return "round";
     return null;
-  }, [last]);
+  }, [lastDone]);
 
   return (
     <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -103,7 +133,7 @@ export default function CopilotPage() {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {suggestedPrompts.map((p) => (
-                <Button key={p} variant="outline" size="sm" onClick={() => ask(p)}>
+                <Button key={p} variant="outline" size="sm" onClick={() => void ask(p)} disabled={busy}>
                   {p}
                 </Button>
               ))}
@@ -112,102 +142,137 @@ export default function CopilotPage() {
         )}
 
         <div className="flex flex-col gap-4">
-          {turns.map((t, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <p className="text-xs text-muted-foreground">You</p>
-                <CardTitle className="text-base font-medium">{t.q}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex gap-2">
-                  <Badge variant="outline" className={confidenceClass(t.a.confidence)}>confidence {t.a.confidence}</Badge>
-                  {t.a.strReady && <Badge>STR-ready</Badge>}
-                </div>
-                {t.a.toolsUsed && t.a.toolsUsed.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5" aria-label="Grounding tools used">
-                    {t.a.toolsUsed.map((tool) => (
-                      <span key={tool} className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
-                        {tool === "risk_analytics" || tool === "system_execute_sql" ? "Cortex Analyst" : tool === "reg_doc_search" ? "Regulatory Search" : tool === "call_search" ? "Call Search" : tool}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <MarkdownAnswer content={t.a.answer} />
-                {t.a.bullets.length > 0 && !/^[-*•]\s+/m.test(t.a.answer) && (
-                  <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
-                    {t.a.bullets.map((b, index) => (
-                      <li key={`${b}-${index}`}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-                {t.a.sql && (
-                  <details className="rounded-lg border border-border bg-muted/20">
-                    <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-muted-foreground">
-                      Generated Cortex Analyst SQL
-                    </summary>
-                    <pre className="max-h-80 overflow-auto border-t border-border p-3 font-mono text-[11px] text-muted-foreground">
-                      {t.a.sql}
-                    </pre>
-                  </details>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  {t.a.citations.map((c, index) => {
-                    const display = citationLabel(c.kind, c.label);
-                    return (
-                      <span
-                        key={`${c.kind}-${c.label}-${index}`}
-                        className="rounded-md border border-border px-2 py-1 text-[11px]"
-                        title={c.detail}
-                      >
-                        <span className="text-primary">{display.kind}</span> · {display.label}
-                      </span>
-                    );
-                  })}
-                </div>
-                {t.a.relatedCaseIds.length > 0 && (
-                  <p className="text-xs">
-                    Cases:{" "}
-                    {t.a.relatedCaseIds.map((id) => (
-                      <Link key={id} href={`/cases/${id}`} className="mr-2 text-primary hover:underline">
-                        {id}
-                      </Link>
-                    ))}
-                    {t.a.strReady && (
-                      <Link href="/str" className="text-primary hover:underline">
-                        Open STR factory
-                      </Link>
-                    )}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          {turns.map((t) => (
+            <div key={t.id} className="flex flex-col gap-2">
+              <Card className="border-primary/15 bg-muted/30">
+                <CardHeader className="py-3">
+                  <p className="text-xs text-muted-foreground">You</p>
+                  <CardTitle className="text-base font-medium">{t.q}</CardTitle>
+                </CardHeader>
+              </Card>
 
-        {busy && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="flex items-start gap-3 py-4">
-              <span className="mt-1 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Investigating with Sentinel</p>
-                <p className="text-xs text-muted-foreground">{groundingMessage}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Cross-domain questions can take 20–45 seconds while the agent grounds the response across analytics and search.
-                  {elapsedSeconds > 0 ? ` ${elapsedSeconds}s elapsed.` : ""}
+              {t.status === "pending" && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="flex items-start gap-3 py-4">
+                    <span className="mt-1 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Investigating with Sentinel</p>
+                      <p className="text-xs text-muted-foreground">{groundingMessage}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Cross-domain questions can take 20–45 seconds while the agent grounds the response.
+                        {elapsedSeconds > 0 ? ` ${elapsedSeconds}s elapsed.` : ""}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {t.status === "error" && (
+                <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                  This question could not be completed. Try again or use a suggestion chip.
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              )}
+
+              {t.status === "done" && t.a && (
+                <Card>
+                  <CardHeader>
+                    <p className="text-xs text-muted-foreground">Sentinel</p>
+                    <CardTitle className="text-base font-medium">Evidence-backed answer</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className={confidenceClass(t.a.confidence)}>confidence {t.a.confidence}</Badge>
+                      {t.a.strReady && <Badge>STR-ready</Badge>}
+                    </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {t.a.engine && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {t.a.engine === "agent"
+                        ? "Cortex Agent"
+                        : t.a.engine === "local-fallback"
+                          ? "Offline engine (agent unavailable)"
+                          : "Offline demo engine"}
+                    </Badge>
+                  )}
+                  {t.a.cacheHit && (
+                    <Badge variant="secondary" className="text-[10px]">demo cache</Badge>
+                  )}
+                </div>
+                    {t.a.toolsUsed && t.a.toolsUsed.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5" aria-label="Grounding tools used">
+                        {t.a.toolsUsed.map((tool, toolIndex) => (
+                          <span key={`${t.id}-${tool}-${toolIndex}`} className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                            {tool === "risk_analytics" || tool === "system_execute_sql" ? "Cortex Analyst" : tool === "reg_doc_search" ? "Regulatory Search" : tool === "call_search" ? "Call Search" : tool}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <MarkdownAnswer content={t.a.answer} />
+                    {t.a.bullets.length > 0 && !/^[-*•]\s+/m.test(t.a.answer) && (
+                      <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
+                        {t.a.bullets.map((b, index) => (
+                          <li key={`${t.id}-b-${index}`}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {t.a.sql && (
+                      <details className="rounded-lg border border-border bg-muted/20">
+                        <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-muted-foreground">
+                          Generated Cortex Analyst SQL
+                        </summary>
+                        <pre className="max-h-80 overflow-auto border-t border-border p-3 font-mono text-[11px] text-muted-foreground">
+                          {t.a.sql}
+                        </pre>
+                      </details>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {t.a.citations.map((c, index) => {
+                        const display = citationLabel(c.kind, c.label);
+                        return (
+                          <span
+                            key={`${t.id}-c-${index}`}
+                            className="rounded-md border border-border px-2 py-1 text-[11px]"
+                            title={c.detail}
+                          >
+                            <span className="text-primary">{display.kind}</span> · {display.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    {t.a.relatedCaseIds.length > 0 && (
+                      <p className="text-xs">
+                        Cases:{" "}
+                        {t.a.relatedCaseIds.map((id) => (
+                          <Link key={id} href={`/cases/${id}`} className="mr-2 text-primary hover:underline">
+                            {id}
+                          </Link>
+                        ))}
+                        {t.a.strReady && (
+                          <Link
+                            href={`/str?caseId=${t.a.relatedCaseIds[0] ?? "CASE-1088"}`}
+                            className="text-primary hover:underline"
+                          >
+                            Open STR factory
+                          </Link>
+                        )}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ))}
+          <div ref={threadEndRef} />
+        </div>
 
         {error && (
           <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-            {error} Check the API route or retry. The local engine is still available via suggestion chips.
+            {error}
           </p>
         )}
 
         <form
-          className="sticky bottom-3 flex flex-col gap-2 rounded-xl border border-border bg-card p-3"
+          className="sticky bottom-3 flex flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-lg"
           onSubmit={(e) => {
             e.preventDefault();
             void ask(input);
@@ -216,11 +281,18 @@ export default function CopilotPage() {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void ask(input);
+              }
+            }}
             placeholder="e.g. Show mule accounts with cash-outs after 2am"
             className="min-h-20"
+            disabled={busy}
           />
           <div className="flex justify-between">
-            <p className="text-[11px] text-muted-foreground">Logged to the audit trail with citations.</p>
+            <p className="text-[11px] text-muted-foreground">Enter to send · Shift+Enter for new line · Logged to audit.</p>
             <Button type="submit" disabled={busy || !input.trim()}>
               {busy ? "Analyzing…" : "Ask"}
             </Button>

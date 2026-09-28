@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { answerQuestion } from "@/lib/engine";
 import { askAgent } from "@/lib/agent";
 import { logAudit } from "@/lib/audit";
+import { isSnowflakeConfigured } from "@/lib/snowflake-config";
+import { warmupSnowflakeForCopilot } from "@/lib/warmup";
+import { getCachedAgentResult, setCachedAgentResult } from "@/lib/copilot-cache";
 
-const useAgent =
-  !!process.env.SNOWFLAKE_ACCOUNT &&
-  !!process.env.SNOWFLAKE_USER &&
-  !!process.env.SNOWFLAKE_PASSWORD;
+export type CopilotEngine = "agent" | "local-fallback" | "local";
 
 export async function POST(request: Request) {
   try {
@@ -17,13 +17,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Empty question" }, { status: 400 });
     }
 
+    const useAgent = isSnowflakeConfigured();
+
     if (useAgent) {
       const start = Date.now();
       try {
+        await warmupSnowflakeForCopilot();
+
+        const cached = getCachedAgentResult(question);
+        if (cached) {
+          const durationMs = Date.now() - start;
+          await logAudit({
+            auditId: `AUD-${Date.now()}`,
+            question,
+            answer: cached.response.answer,
+            confidence: cached.response.confidence,
+            citations: cached.response.citations.map((c) => `${c.kind}:${c.label}`).join(", "),
+            sqlText: cached.response.sql,
+            status: "success",
+            durationMs,
+            toolsUsed: `${cached.toolsUsed.join(", ") || "agent"},demo-cache`,
+          }).catch((e) => console.error("[audit-write]", e));
+
+          return NextResponse.json({
+            ...cached.response,
+            toolsUsed: cached.toolsUsed,
+            engine: "agent" satisfies CopilotEngine,
+            auditLogged: true,
+            cacheHit: true,
+          });
+        }
+
         const { response, toolsUsed } = await askAgent(question);
+        setCachedAgentResult(question, { response, toolsUsed });
         const durationMs = Date.now() - start;
 
-        logAudit({
+        await logAudit({
           auditId: `AUD-${Date.now()}`,
           question,
           answer: response.answer,
@@ -35,32 +64,49 @@ export async function POST(request: Request) {
           toolsUsed: toolsUsed.join(", ") || undefined,
         }).catch((e) => console.error("[audit-write]", e));
 
-        return NextResponse.json({ ...response, toolsUsed });
+        return NextResponse.json({
+          ...response,
+          toolsUsed,
+          engine: "agent" satisfies CopilotEngine,
+          auditLogged: true,
+          cacheHit: false,
+        });
       } catch (agentErr) {
         const durationMs = Date.now() - start;
         const errMsg =
           agentErr instanceof Error ? agentErr.message : "Unknown agent error";
 
-        logAudit({
+        const fallback = answerQuestion(question);
+
+        await logAudit({
           auditId: `AUD-${Date.now()}`,
           question,
-          answer: "",
-          confidence: "low",
-          citations: "",
-          status: "error",
+          answer: fallback.answer,
+          confidence: fallback.confidence,
+          citations: fallback.citations.map((c) => `${c.kind}:${c.label}`).join(", "),
+          sqlText: fallback.sql,
+          status: "success",
           durationMs,
-          errorMessage: errMsg,
+          toolsUsed: "local-fallback",
+          errorMessage: `Agent error: ${errMsg}`,
         }).catch((e) => console.error("[audit-write]", e));
 
         console.error("[copilot-agent]", agentErr);
-        return NextResponse.json(
-          { error: "Copilot request failed" },
-          { status: 500 },
-        );
+        return NextResponse.json({
+          ...fallback,
+          engine: "local-fallback" satisfies CopilotEngine,
+          auditLogged: true,
+          agentError: errMsg,
+        });
       }
     }
 
-    return NextResponse.json(answerQuestion(question));
+    const local = answerQuestion(question);
+    return NextResponse.json({
+      ...local,
+      engine: "local" satisfies CopilotEngine,
+      auditLogged: false,
+    });
   } catch (err) {
     console.error("[copilot]", err);
     return NextResponse.json(

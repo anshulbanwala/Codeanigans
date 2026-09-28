@@ -126,6 +126,7 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
 
   // Extract case and alert IDs from the answer text
   for (const m of answer.matchAll(/CASE-\d+/g)) caseIds.add(m[0]);
+  for (const m of answer.matchAll(/ALRT-\d+/g)) alertIds.add(m[0]);
   for (const m of answer.matchAll(/ALR-\d+/g)) alertIds.add(m[0]);
 
   // Parse bullets from markdown list items
@@ -139,7 +140,15 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
 
   // Determine confidence based on agent completion and tool usage
   const usedTools = raw.content.some((b) => b.type === "tool_result");
-  const confidence: CopilotResponse["confidence"] = usedTools ? "high" : "medium";
+  const abstained =
+    /abstain/i.test(answer) ||
+    /could not ground/i.test(answer) ||
+    /cannot ground/i.test(answer);
+  const confidence: CopilotResponse["confidence"] = abstained
+    ? "low"
+    : usedTools
+      ? "high"
+      : "medium";
 
   // Check STR readiness
   const strReady =

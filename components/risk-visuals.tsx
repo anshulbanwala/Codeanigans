@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { transactions, liquidity } from "@/lib/data";
+import { liquidity as localLiquidity, transactions } from "@/lib/data";
 import { inr } from "@/lib/format";
+import type { LiquiditySnapshot } from "@/lib/types";
 
-const channelTotals = ["CASH", "ATM", "UPI", "NEFT", "IMPS", "RTGS"].map((channel) => ({
-  channel,
-  amount: transactions
-    .filter((transaction) => transaction.channel === channel)
-    .reduce((total, transaction) => total + transaction.amountInr, 0),
-}));
-
-const maxChannelAmount = Math.max(...channelTotals.map((item) => item.amount), 1);
+function defaultChannelTotals() {
+  return ["CASH", "ATM", "UPI", "NEFT", "IMPS", "RTGS"].map((channel) => ({
+    channel,
+    amount: transactions
+      .filter((transaction) => transaction.channel === channel)
+      .reduce((total, transaction) => total + transaction.amountInr, 0),
+  }));
+}
 
 function chartPoints(values: number[], width: number, height: number, padding = 6) {
   const minimum = Math.min(...values);
@@ -34,7 +35,8 @@ function Sparkline({ values, color = "#8ce0d0" }: { values: number[]; color?: st
   );
 }
 
-export function LiquidityPulse() {
+export function LiquidityPulse({ snapshot }: { snapshot?: LiquiditySnapshot }) {
+  const liquidity = snapshot ?? localLiquidity;
   const values = [
     liquidity.lcrPct - 4.8,
     liquidity.lcrPct - 3.2,
@@ -67,7 +69,13 @@ export function LiquidityPulse() {
   );
 }
 
-export function ChannelMix() {
+export function ChannelMix({
+  channels,
+}: {
+  channels?: { channel: string; amount: number }[];
+}) {
+  const channelTotals = channels ?? defaultChannelTotals();
+  const maxChannelAmount = Math.max(...channelTotals.map((item) => item.amount), 1);
   return (
     <Card className="border-border/80 bg-card/80 shadow-none">
       <CardHeader className="pb-2">

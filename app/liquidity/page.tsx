@@ -1,15 +1,27 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { liquidity } from "@/lib/data";
+import { MartSourceBanner } from "@/components/mart-source-banner";
+import { getLiquidityLatest, getLiquiditySeries } from "@/lib/mart";
 import { pct } from "@/lib/format";
 
-const lcrSeries = [102, 104, 103, 107, 105, 109, 108, 110, 108, 111, 109, 108, liquidity.lcrPct];
-const runoffSeries = [142, 138, 146, 151, 149, 155, 160, 158, 164, 171, 168, 176, liquidity.wholesaleRunoffInrCr];
+export const dynamic = "force-dynamic";
 
-export default function LiquidityPage() {
+export default async function LiquidityPage() {
+  const [latestResult, seriesResult] = await Promise.all([
+    getLiquidityLatest(),
+    getLiquiditySeries(),
+  ]);
+  const liquidity = latestResult.data;
+  const series = seriesResult.data;
+  const lcrSeries = series.length > 1 ? series.map((s) => s.lcrPct) : [102, 104, 103, 107, 105, 109, 108, liquidity.lcrPct];
+  const runoffSeries = series.length > 1
+    ? series.map((s) => s.wholesaleRunoffInrCr)
+    : [142, 138, 146, 151, 149, 155, 160, liquidity.wholesaleRunoffInrCr];
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
+      <MartSourceBanner source={latestResult.source} />
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Treasury risk</p>
@@ -27,7 +39,7 @@ export default function LiquidityPage() {
 
       <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
         <Card>
-          <CardHeader className="flex flex-row items-start justify-between gap-3"><div><CardTitle className="text-sm">Coverage trajectory</CardTitle><p className="mt-1 text-xs text-muted-foreground">LCR percentage · last 90 observations</p></div><Badge variant="outline">{liquidity.bufferDays} day buffer</Badge></CardHeader>
+          <CardHeader className="flex flex-row items-start justify-between gap-3"><div><CardTitle className="text-sm">Coverage trajectory</CardTitle><p className="mt-1 text-xs text-muted-foreground">LCR percentage · mart history</p></div><Badge variant="outline">{liquidity.bufferDays} day buffer</Badge></CardHeader>
           <CardContent><LineChart values={lcrSeries} color="#18a895" floor={100} suffix="%" /></CardContent>
         </Card>
         <Card>
@@ -42,7 +54,7 @@ export default function LiquidityPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Wholesale runoff pressure</CardTitle><p className="text-xs text-muted-foreground">Illustrative stress progression in INR crore</p></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Wholesale runoff pressure</CardTitle><p className="text-xs text-muted-foreground">Stress progression in INR crore</p></CardHeader>
         <CardContent><LineChart values={runoffSeries} color="#d88a38" suffix=" Cr" /></CardContent>
       </Card>
     </div>
@@ -63,7 +75,7 @@ function LineChart({ values, color, floor, suffix = "" }: { values: number[]; co
   const height = 220;
   const minimum = floor == null ? Math.min(...values) * 0.96 : Math.min(floor, ...values) - 2;
   const maximum = Math.max(...values) * 1.04;
-  const point = (value: number, index: number) => ({ x: 18 + index * ((width - 36) / (values.length - 1)), y: height - 18 - ((value - minimum) / (maximum - minimum)) * (height - 36) });
+  const point = (value: number, index: number) => ({ x: 18 + index * ((width - 36) / Math.max(values.length - 1, 1)), y: height - 18 - ((value - minimum) / (maximum - minimum)) * (height - 36) });
   const points = values.map(point);
   const path = points.map((item, index) => `${index === 0 ? "M" : "L"}${item.x},${item.y}`).join(" ");
   const floorY = floor == null ? undefined : height - 18 - ((floor - minimum) / (maximum - minimum)) * (height - 36);
