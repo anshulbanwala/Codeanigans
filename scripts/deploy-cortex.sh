@@ -34,4 +34,18 @@ cortex agent-studio agent-deploy -c "$CONN" \
 echo "Publishing agent live version..."
 cortex agent-studio agent-publish -c "$CONN" --fqn SENTINEL.RISK.SENTINEL_AGENT 2>/dev/null || true
 
+echo "Restoring APP_DEVELOPER grants (agent deploy resets USAGE)..."
+if [[ -n "${SNOWFLAKE_ADMIN_USER:-}" && -n "${SNOWFLAKE_ADMIN_PASSWORD:-}" ]]; then
+  SNOWFLAKE_USER="$SNOWFLAKE_ADMIN_USER" \
+  SNOWFLAKE_PASSWORD="$SNOWFLAKE_ADMIN_PASSWORD" \
+  SNOWFLAKE_ROLE="${SNOWFLAKE_ADMIN_ROLE:-ACCOUNTADMIN}" \
+    node "${ROOT}/scripts/run-sql-file.mjs" "${ROOT}/snowflake/08_app_developer_grants.sql" || {
+      echo "Warning: grant script failed — run snowflake/08_app_developer_grants.sql as ACCOUNTADMIN."
+    }
+else
+  echo "Set SNOWFLAKE_ADMIN_USER + SNOWFLAKE_ADMIN_PASSWORD to auto-apply grants, or run:"
+  echo "  node scripts/run-sql-file.mjs snowflake/08_app_developer_grants.sql  # with ACCOUNTADMIN in env"
+fi
+
 echo "Done. Verify: cortex agents list -c $CONN"
+echo "Shared dev: node scripts/test-copilot-access.mjs (with APP_DEVELOPER in .env.local)"

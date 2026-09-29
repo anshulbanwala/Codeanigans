@@ -15,17 +15,21 @@ cd /Users/rajat/Codeanigans
 ./scripts/setup-local.sh
 ```
 
-Edit **`.env.local`** (hackathon values — never commit):
+Edit **`.env.local`** (never commit). **Shared dev / copilot demo:**
 
 ```env
-SNOWFLAKE_ACCOUNT=xy12345.ap-south-1.aws
-SNOWFLAKE_USER=...
-SNOWFLAKE_PASSWORD=...
-SNOWFLAKE_ROLE=ACCOUNTADMIN
+SNOWFLAKE_ACCOUNT=vgwrwen-ed58886
+SNOWFLAKE_USER=SENTINEL_DEV_USER
+SNOWFLAKE_PASSWORD=<from team lead — not in git>
+SNOWFLAKE_ROLE=APP_DEVELOPER
 SNOWFLAKE_WAREHOUSE=SENTINEL_WH
 SNOWFLAKE_DATABASE=SENTINEL
 SNOWFLAKE_SCHEMA=RISK
 ```
+
+Use **ACCOUNTADMIN** + your personal user only for SQL bootstrap and `./scripts/deploy-cortex.sh`. After every agent deploy, run **`snowflake/08_app_developer_grants.sql`** as ACCOUNTADMIN (or `node scripts/run-sql-file.mjs snowflake/08_app_developer_grants.sql` with admin env vars). Agent `CREATE OR REPLACE` drops `USAGE ON AGENT` for `APP_DEVELOPER`.
+
+Test shared login: `node scripts/test-snowflake.mjs` and `node scripts/test-copilot-access.mjs`.
 
 Restart dev server after saving `.env.local`:
 

@@ -15,7 +15,13 @@ for (const line of readFileSync(envPath, "utf8").split("\n")) {
   if (!t || t.startsWith("#")) continue;
   const i = t.indexOf("=");
   if (i === -1) continue;
-  env[t.slice(0, i).trim()] = t.slice(i + 1).trim();
+  const key = t.slice(0, i).trim();
+  if (!env[key]) env[key] = t.slice(i + 1).trim();
+}
+for (const key of Object.keys(process.env)) {
+  if (key.startsWith("SNOWFLAKE_") && process.env[key]) {
+    env[key] = process.env[key];
+  }
 }
 
 snowflake.configure({ logLevel: "ERROR" });
