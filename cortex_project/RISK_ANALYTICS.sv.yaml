@@ -300,6 +300,9 @@ tables:
   - name: TOP10_EXPOSURE
     expr: TOP10_EXPOSURE
     data_type: BOOLEAN
+  - name: BREACH_FLAG
+    expr: BREACH_FLAG
+    data_type: BOOLEAN
   facts:
   - name: EXPOSURE_INR
     expr: EXPOSURE_INR

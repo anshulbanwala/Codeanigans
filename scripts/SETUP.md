@@ -48,6 +48,7 @@ Run in order in the hackathon Snowflake account:
 3. `snowflake/03_expand.sql`
 4. `snowflake/04_winner_expansion.sql`
 5. `snowflake/05_app_views.sql`
+6. `snowflake/09_large_exposure_fix.sql` (after `04_winner_expansion.sql`)
 
 Then follow **`coco/PROMPTS.md`** for Cortex Search + data expansion (or use cortex chat with those prompts).
 

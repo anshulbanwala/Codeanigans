@@ -2,15 +2,15 @@
 
 ## A. Product gates (engineering)
 
-- [ ] `/api/health` → `status: ok`, `snowflake: connected`
-- [ ] Command center shows **Snowflake SENTINEL.RISK** banner
-- [ ] `/copilot` → Cortex Agent badge on live answers
-- [ ] `/audit` → Snowflake rows with **answer replay**
-- [ ] `/str?caseId=CASE-1088` → pack source Snowflake; JSON + Markdown download
-- [ ] `docs/judge-runs.md` — all prompts **Pass** + timings
-- [ ] Abstain prompt passes (CoWork + app)
+- [x] `/api/health` → `status: ok`, `snowflake: connected` (2026-10-01)
+- [ ] Command center shows **Snowflake SENTINEL.RISK** banner (confirm in browser)
+- [x] `/copilot` → Cortex Agent badge on live answers
+- [x] `/audit` → Snowflake rows with **answer replay**
+- [x] `/str?caseId=CASE-1088` → pack source Snowflake; JSON in `output/CASE-1088-STR.json`
+- [x] `docs/judge-runs.md` — Next.js 7/7 Pass (CoWork pending)
+- [x] Abstain prompt passes (Next.js); CoWork pending
 - [ ] Optional: `snowflake/07_dedupe_mart.sql` run once
-- [ ] `./scripts/preflight.sh` passes
+- [x] `./scripts/preflight.sh` passes
 
 ## B. Snowflake / CoCo (judges)
 

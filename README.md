@@ -37,9 +37,10 @@ Suggested demo path: Command center → Copilot (mule + CTR prompts) → case CA
 3. Run `snowflake/02_seed.sql` and `snowflake/03_expand.sql` for the foundation story data.
 4. Run `snowflake/04_winner_expansion.sql` for additive customers, transactions, evidence graph tables, feature views, and Analyst verification surfaces.
 5. Run `snowflake/05_app_views.sql` for app read views (`OPEN_ALERTS_V`, `CASE_CUSTOMERS_V`).
-6. Run `snowflake/07_dedupe_mart.sql` if expansion scripts were applied more than once.
-7. Install CoCo CLI and walk `coco/PROMPTS.md` in order.
-8. Copy `coco/skills/str-factory/SKILL.md` into your CoCo skills folder; save outputs under `output/`.
+6. Run `snowflake/09_large_exposure_fix.sql` after `04_winner_expansion.sql` (Golden Peak concentration).
+7. Run `snowflake/07_dedupe_mart.sql` if expansion scripts were applied more than once.
+8. Install CoCo CLI and walk `coco/PROMPTS.md` in order.
+9. Copy `coco/skills/str-factory/SKILL.md` into your CoCo skills folder; save outputs under `output/`.
 
 Install CoCo:
 
