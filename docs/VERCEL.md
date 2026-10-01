@@ -8,14 +8,23 @@ Use this URL as **Prototype Deployed Link** on Hack2skill (plus CoWork for the S
 - GitHub repo connected: `anshulbanwala/Codeanigans`  
 - **Vercel Pro** (or team plan) recommended — copilot calls `DATA_AGENT_RUN` often need **>60s** (`maxDuration: 300` in `vercel.json`).
 
-## 2. Import project
+## 2. Import project (fastest — use GitHub)
 
-1. Vercel Dashboard → **Add New** → **Project**  
-2. Import **Codeanigans** from GitHub  
-3. Framework: **Next.js** (auto-detected)  
-4. Root directory: `.` (repo root)  
-5. Build command: `npm run build`  
-6. Region: **Singapore (sin1)** — closer to Snowflake APJ hackathon account  
+**Option A — Browser (recommended, ~5 min)**
+
+1. Open: https://vercel.com/new/import?s=https://github.com/anshulbanwala/Codeanigans  
+2. **Continue with GitHub** → authorize → import **Codeanigans**  
+3. Framework: **Next.js** · Root: `./` · Deploy  
+4. Add environment variables (step 3 below) → **Redeploy**
+
+**Option B — CLI + GitHub Actions (auto-deploy on every `main` push)**
+
+```bash
+chmod +x scripts/vercel-github-setup.sh
+./scripts/vercel-github-setup.sh
+```
+
+Then add Snowflake env vars in the Vercel dashboard and run `vercel --prod` once, or push to `main` to trigger the workflow.
 
 ## 3. Environment variables (required)
 
