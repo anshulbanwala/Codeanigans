@@ -51,6 +51,8 @@ cortex
 
 ## Docs
 
+- [docs/HOW_TO_FILL_SUBMISSION.md](docs/HOW_TO_FILL_SUBMISSION.md) — **step-by-step** (judge-runs, PDF, video, Hack2skill).
+- [docs/ONE_PAGER.md](docs/ONE_PAGER.md) — **1-pager source** (technical; export to PDF).
 - [docs/SHIP_CHECKLIST.md](docs/SHIP_CHECKLIST.md) — **final shipping** (submission pack + gates).
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Snowflake, Cortex deploy, CoWork, Streamlit, hosting.
 - [scripts/SETUP.md](scripts/SETUP.md) — quick local setup.
