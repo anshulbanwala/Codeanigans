@@ -1,107 +1,114 @@
-# Sentinel — Risk, Fraud & Regulatory Intelligence Copilot
+# Sentinel
+### Risk, fraud & regulatory intelligence for Indian NBFCs
 
-**Team Codeanigans** · Snowflake CoCo CLI Hackathon 2026, GCC Edition · **Theme 1**  
-**Repo:** https://github.com/anshulbanwala/Codeanigans · **Agent:** `SENTINEL.RISK.SENTINEL_AGENT`
-
----
-
-## Problem (30s read)
-
-NBFC AML desks juggle **fraud alerts**, **liquidity/credit risk**, and **regulatory filings** (PMLA cash reporting, RBI KYC, FIU-IND suspicious transaction reports) across Excel, email, and portals. They need **governed natural-language access** to structured and unstructured evidence—and **audit-ready regulatory artifacts**, not a generic chatbot.
+**Team Codeanigans** · Snowflake CoCo CLI Hackathon 2026, GCC Edition · Theme 1  
+**Repository:** https://github.com/anshulbanwala/Codeanigans
 
 ---
 
-## Solution
+## The problem
 
-**Sentinel** is an MLRO-desk copilot for **Aarohan Finance Ltd.** (synthetic Indian NBFC): command center → **Cortex Agent** copilot → case investigation → **FIU-style STR pack** (JSON/Markdown) → **immutable audit log**. The agent **separates fact vs interpretation**, **cites document IDs**, and **abstains** when ungrounded (e.g. fictional “crypto tax 2030”).
-
----
-
-## Why this design fits Theme 1 (and judging rubric)
-
-| Rubric | How Sentinel scores |
-|--------|---------------------|
-| **Relevance (30%)** | India NBFC story: ₹10L CTR structuring, 2am mule ring, PEP EDD, Golden Peak large exposure, LCR/wholesale runoff—all on RBI/FIU-shaped demo corpus. |
-| **Technical execution (40%)** | Full **CoCo CLI** path: synthetic mart → **dual Cortex Search** (calls + regulations) → **semantic view / Cortex Analyst** → **Cortex Agent** → CoWork + `DATA_AGENT_RUN` from Next.js. Custom **str-factory** skill. Not a LangChain sidecar. |
-| **Completeness (30%)** | End-to-end: **detect → investigate → file STR → audit**. UI surfaces for each step; certified **7/7** demo prompts on live agent (Next.js). |
-
-**Differentiator vs typical entries:** Most teams stop at “suspicious graph” or Streamlit-only. Sentinel ships the **regulatory deliverable** (STR pack) and **COPILOT_AUDIT** replay—the explicit second half of the Theme 1 statement.
+Anti–money laundering and compliance teams at banks and NBFCs still work across **spreadsheets, case tools, email, and regulator portals**. Analysts lose hours stitching together **transaction patterns**, **relationship-manager notes**, and **RBI / PMLA / FIU-IND guidance**—then rebuilding the same narrative for **suspicious activity reports** and internal audit. Generic chatbots are not acceptable: answers must be **grounded**, **cited**, and **replayable**.
 
 ---
 
-## Architecture (production-shaped, Snowflake-native)
+## What Sentinel is
+
+**Sentinel** is a copilot for the money-laundering reporting officer’s desk at **Aarohan Finance Ltd.**—a synthetic Indian NBFC built for demonstration. Analysts ask questions in plain English. Sentinel:
+
+- **Surfaces** fraud, liquidity, and credit-risk signals from governed data  
+- **Grounds** every answer in database evidence or cited regulatory excerpts  
+- **Produces** download-ready **FIU-IND–style suspicious transaction report packs**  
+- **Records** who asked what, with SQL, tools used, and citations—in an **audit log**  
+- **Refuses to guess** when the corpus cannot support an answer  
+
+Sentinel is built **on Snowflake’s AI Data Cloud** using the **CoCo CLI** workflow: synthetic mart, Cortex Search on calls and circulars, a semantic analytics layer, and a **Cortex Agent** that orchestrates tools—not a bolt-on chat UI on a spreadsheet.
+
+---
+
+## Why Sentinel is built to win real desks
+
+| Capability | What it means for the business |
+|------------|--------------------------------|
+| **One agent, two worlds** | Same question can pull **structured** SQL (alerts, txns, LCR, concentrations) and **unstructured** search (call transcripts, policy chunks). |
+| **Regulatory output, not chat only** | STR factory emits **JSON + Markdown** packs aligned to investigation cases—the filing step many desks still do manually. |
+| **Compliance-grade behavior** | Facts vs interpretation; document IDs (e.g. PMLA, RBI KYC, FIU STR timing); **abstain** on out-of-scope questions. |
+| **Full investigation loop** | Command center → copilot → case file → STR download → audit replay in one demo path. |
+| **Enterprise naming & deploy** | All objects under **`SENTINEL.RISK.*`**; reproducible deploy script and shared developer access for the team. |
+
+---
+
+## Architecture (at a glance)
 
 ```
-Analyst UI (Next.js 16 + optional Streamlit-in-Snowflake)
-    │
-    ▼
-SNOWFLAKE.CORTEX.DATA_AGENT_RUN → SENTINEL.RISK.SENTINEL_AGENT
-    │
-    ├─ Cortex Analyst ← semantic view SENTINEL.RISK.RISK_ANALYTICS
-    │     (transactions, alerts, cases, liquidity, credit concentration + BREACH_FLAG)
-    ├─ Cortex Search ← SENTINEL.RISK.CALL_SEARCH (RM transcripts)
-    ├─ Cortex Search ← SENTINEL.RISK.REG_DOC_SEARCH (PMLA / RBI KYC / FIU / Basel excerpts)
-    └─ CoCo skill str-factory → FIU-IND-style JSON + Markdown (repo: output/CASE-1088-STR.json)
-    │
-    ▼
-SENTINEL.RISK.COPILOT_AUDIT (question, answer, SQL, tools, citations)
+Analyst  →  Next.js desk (command center, copilot, cases, STR, audit)
+                ↓
+         SENTINEL.RISK.SENTINEL_AGENT  (Snowflake Cortex Agent)
+                ↓
+    ┌───────────┼───────────┐
+    ▼           ▼           ▼
+ Analytics   Call search   Regulation search
+ (semantic   (RM notes)    (RBI / PMLA / FIU excerpts)
+  view)
+                ↓
+         STR factory skill  →  FIU-style pack
+                ↓
+         COPILOT_AUDIT  →  immutable Q&A history
 ```
 
-**Governance:** Shared role `APP_DEVELOPER` for dev/demo; least-privilege grants restored after each agent deploy (`08_app_developer_grants.sql`).
+Optional: **Streamlit-in-Snowflake** companion on the same mart (`streamlit/` in repo).
 
 ---
 
-## Data scale (synthetic mart — live account)
+## Data & realism (synthetic, production-shaped)
 
-Designed for **realistic analyst queries**, not toy 10-row demos. After foundation + expansion scripts (representative counts on hackathon account):
+| Asset | Scale (hackathon mart) |
+|-------|-------------------------|
+| Customers | ~250 |
+| Transactions | **6,000+** (INR, channels, typologies: structuring, mule, layering) |
+| Alerts | **~165** |
+| Investigation cases | **~50** |
+| Liquidity history | 60+ daily LCR / NSFR observations |
+| Credit book | **~110** borrowers; **Golden Peak Realty** large-exposure storyline |
+| Unstructured | Call transcripts + curated regulatory document index |
+| Evidence graph | Devices, logins, merchants, entity links for network cases |
 
-| Layer | Scale (order of magnitude) |
-|-------|------------------------------|
-| **Customers** | ~250 (hero cases + generated portfolio) |
-| **Transactions** | **6,000+** INR-shaped rows (structuring, mule, layering typologies) |
-| **Alerts** | **~165** open/escalated mix |
-| **Cases** | **~50** investigation files |
-| **Call transcripts** | Unstructured RM notes (Cortex Search) |
-| **REG_DOCS** | Curated regulatory chunks (6 authoritative + synthetic NBFC circulars) |
-| **Liquidity** | 60+ daily LCR/NSFR observations |
-| **Credit** | **~110** borrowers; **Golden Peak** concentration overlay (`09_large_exposure_fix.sql`) |
-| **Graph / evidence** | Device fingerprints, login events, merchants, entity relationships, case evidence links |
-
-**Disclaimer:** 100% synthetic; no production PII. Regulatory text is demo corpus only—not legal advice.
+**All data is synthetic.** No real customer PII. Regulatory text is a **demo corpus** for citations—not legal advice.
 
 ---
 
-## Snowflake objects (for judge verification)
+## Snowflake objects (verification)
 
-| Type | FQN |
-|------|-----|
-| Database / schema | `SENTINEL.RISK` |
-| Warehouse | `SENTINEL_WH` |
-| **Cortex Agent** | `SENTINEL.RISK.SENTINEL_AGENT` |
-| Semantic view | `SENTINEL.RISK.RISK_ANALYTICS` |
+| | |
+|---|---|
+| Agent | `SENTINEL.RISK.SENTINEL_AGENT` |
+| Semantic analytics | `SENTINEL.RISK.RISK_ANALYTICS` |
 | Search (calls) | `SENTINEL.RISK.CALL_SEARCH` |
 | Search (regulations) | `SENTINEL.RISK.REG_DOC_SEARCH` |
 | Audit | `SENTINEL.RISK.COPILOT_AUDIT` |
-| App views | `OPEN_ALERTS_V`, `CASE_CUSTOMERS_V` |
+| Warehouse | `SENTINEL_WH` |
 
-**App stack:** TypeScript, Next.js, Snowflake Node driver, `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`. Deploy: `./scripts/deploy-cortex.sh` + `coco/PROMPTS.md`.
-
----
-
-## Certified demo prompts (7)
-
-1. Mule cash-outs after 2am  
-2. Rahul Mehta — ₹10L CTR structuring  
-3. LCR and wholesale runoff  
-4. RBI large-exposure norms (Golden Peak)  
-5. PEP enhanced due diligence  
-6. FIU-IND STR due this week *(full file: `/str?caseId=CASE-1088`)*  
-7. **Abstain:** crypto mining tax rule 2030  
-
-Recorded results: `docs/judge-runs.md` · Automation: `npm run certify:prompts`
+Live app path: `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` from `/api/copilot`.
 
 ---
 
-## Team
+## What Sentinel can do
 
-**Codeanigans** — Sentinel (Anshul & team). Built for GCC BFSI: governed AI on enterprise data with compliance-grade outputs.
+- **Monitor the desk** — Live command center for open alerts, case queue, liquidity (LCR/NSFR), and credit concentration on the Snowflake mart.  
+- **Investigate in natural language** — Ask about mule cash-outs, structuring under cash reporting limits, PEP due diligence, large exposures, or wholesale runoff; get SQL-backed answers with regulatory citations.  
+- **Search unstructured evidence** — Pull relevant passages from RM call transcripts and indexed RBI / PMLA / FIU policy chunks alongside structured facts.  
+- **Work case files** — Drill into named investigations (e.g. mule ring, smurfing, PEP wealth mismatch) with linked customers, transactions, and transcripts.  
+- **Generate STR packs** — Produce FIU-IND–style suspicious transaction report **JSON and Markdown** for a case ID, ready for MLRO review and filing workflows.  
+- **Prove governance** — Every copilot question and answer is stored with confidence, citations, SQL, and tools used—replayable from the audit screen.  
+- **Stay honest** — When a question is outside the governed corpus (e.g. fictional future tax rules), Sentinel declines instead of inventing policy.  
+- **Run on Snowflake end-to-end** — Same Cortex Agent in the web app, CoWork / Snowflake Intelligence, and optional Streamlit companion—one agent, one mart, one audit trail.
+
+Proof artifacts in repo: **`docs/judge-runs.md`** · **`output/CASE-1088-STR.json`**
+
+---
+
+## Stack
+
+Next.js · TypeScript · Snowflake (tables, Cortex Search, semantic view, Cortex Agent) · CoCo CLI · optional Streamlit in Snowflake.
+
+**Codeanigans** — Sentinel (Anshul · mycowdeveloper)
