@@ -8,6 +8,9 @@ import { getCachedAgentResult, setCachedAgentResult } from "@/lib/copilot-cache"
 
 export type CopilotEngine = "agent" | "local-fallback" | "local";
 
+/** Vercel Pro recommended — Cortex agent answers can exceed 60s. */
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { question?: string };

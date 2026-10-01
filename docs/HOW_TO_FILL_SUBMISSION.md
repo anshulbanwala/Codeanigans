@@ -79,6 +79,7 @@ Typical fields (wording may vary):
 | GitHub / repo | `https://github.com/anshulbanwala/Codeanigans` |
 | Demo video | Unlisted YouTube/Vimeo URL |
 | Document | Upload **PDF** from Part B |
+| **Prototype Deployed Link** | `https://<your-app>.vercel.app` — see **`docs/VERCEL.md`** |
 | Description (if box) | 2–3 sentences from ONE_PAGER problem + solution |
 | Snowflake objects (if box) | `SENTINEL.RISK.SENTINEL_AGENT`, `RISK_ANALYTICS`, `CALL_SEARCH`, `REG_DOC_SEARCH` |
 

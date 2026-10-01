@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "functions": {
+    "app/api/copilot/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/str/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/warmup/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

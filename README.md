@@ -28,6 +28,8 @@ npm run dev
 
 Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
+**Public demo (Vercel):** deploy per [docs/VERCEL.md](docs/VERCEL.md) — use that URL as Hack2skill **Prototype Deployed Link**.
+
 Suggested demo path: Command center → Copilot (mule + CTR prompts) → case CASE-1088 → STR factory → Audit log.
 
 ## Snowflake + CoCo
