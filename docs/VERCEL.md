@@ -17,14 +17,21 @@ Use this URL as **Prototype Deployed Link** on Hack2skill (plus CoWork for the S
 3. Framework: **Next.js** · Root: `./` · Deploy  
 4. Add environment variables (step 3 below) → **Redeploy**
 
-**Option B — CLI + GitHub Actions (auto-deploy on every `main` push)**
+**Option B — GitHub Actions (manual only)**
 
-```bash
-chmod +x scripts/vercel-github-setup.sh
-./scripts/vercel-github-setup.sh
-```
+Do **not** rely on Actions until secrets exist (otherwise you get `missing a value` for `--token`).
 
-Then add Snowflake env vars in the Vercel dashboard and run `vercel --prod` once, or push to `main` to trigger the workflow.
+1. Run once locally:
+   ```bash
+   ./scripts/vercel-github-setup.sh
+   ```
+   This sets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` in **GitHub → Settings → Secrets**.
+
+2. Add Snowflake env vars in **Vercel** dashboard (not GitHub).
+
+3. Trigger deploy: **GitHub → Actions → Vercel Production → Run workflow**.
+
+**Recommended:** Option A (Vercel imports GitHub and deploys on every push—no Actions secrets needed).
 
 ## 3. Environment variables (required)
 
