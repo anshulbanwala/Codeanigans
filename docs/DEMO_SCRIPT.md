@@ -1,354 +1,286 @@
-# Sentinel — full presentation & demo script (mixed slides + live)
+# Sentinel — recording script (one-pager + live demo)
 
 **Team:** Codeanigans (Anshul + **mycowdeveloper**)  
-**Event:** Snowflake CoCo CLI Hackathon 2026 — **GCC Edition**, **Theme 1** (Risk, Fraud & Regulatory Intelligence Copilot)  
-**Length:** **6–8 minutes** recorded (edit copilot wait times; judges accept 3–5 min if tight)  
-**Surfaces:** **8-slide deck** (PDF export from `docs/ONE_PAGER.md` + screenshots) **+** live **Next.js desk** **+** **Snowflake CoWork**
+**Event:** Snowflake CoCo CLI Hackathon 2026 — **GCC Edition**, **Theme 1**  
+**Target length:** **5–5½ minutes** (OK to run to ~6 min if copilot waits are trimmed in edit)  
+**What you show:** **`docs/ONE_PAGER.md` as PDF** (intro only) → **Sentinel Next.js app** (full desk) → **Snowflake CoWork** (same agent)  
+**Certified prompts:** `docs/judge-runs.md` — **7/7 Pass** (Next.js + CoWork)
 
-**URLs (fill before recording):**
+**Before record:** `docs/demo-warmup.md` · `./scripts/preflight.sh` · Snowflake banner on homepage (not “offline demo”)
 
-| Surface | URL |
-|---------|-----|
-| Local app | http://127.0.0.1:43127 (or your Vercel URL) |
-| Health check | `/api/health` → `status: ok`, Snowflake connected |
-| CoWork agent | `SENTINEL.RISK.SENTINEL_AGENT` — paste chat URL in `docs/judge-runs.md` |
-| GitHub | https://github.com/anshulbanwala/Codeanigans |
-
-**Warmup:** `docs/demo-warmup.md` · **Certify:** `docs/judge-runs.md` — **7/7 Pass** (Next.js + CoWork) · **Preflight:** `./scripts/preflight.sh`
+| Tab | URL |
+|-----|-----|
+| One-pager PDF | Export from `docs/ONE_PAGER.md` (Print → PDF) |
+| Sentinel | http://127.0.0.1:43127 or Vercel URL |
+| CoWork | Agent `SENTINEL.RISK.SENTINEL_AGENT` — see `docs/judge-runs.md` |
 
 ---
 
-## How this script works (mixed format)
+## The one copilot question (use on **both** Next.js and CoWork)
 
-You **alternate** between **slides** and **live product**—like a conference talk:
-
-1. **Slide** = one idea (problem, loop, architecture)—**15–25 seconds**, no scrolling a long deck mid-demo.  
-2. **Live** = you **navigate** the app and **say what you click** (“I’m opening Command center…”).  
-3. **One deep copilot question in Next.js** (primary investigation).  
-4. **One deep question in CoWork** (proves same Snowflake agent—not a separate chatbot).  
-5. **No second Next.js copilot question** in the video (saves time; CoWork carries the second NL query).
-
-**Do not** read the PDF line-by-line on camera. Slides are **anchors**; the app is **proof**.
-
-**Language:** Avoid fraud typology lectures (mule/layering/smurfing). Say **high-priority alert**, **unusual activity**, **investigation case**, **filing pack**.
-
----
-
-## Before you hit Record
-
-### Browser tabs (left to right)
-
-1. **Slide deck** — fullscreen (`F`), slide 1 ready. Export from Google Slides/PowerPoint or open PDF.  
-2. **Sentinel app** — logged in, sidebar visible.  
-3. **CoWork** — already on chat with `SENTINEL.RISK.SENTINEL_AGENT` (cold start done).  
-4. **GitHub repo** (optional)—for closing slide.
-
-### Window layout
-
-- **Recording:** 1920×1080, 100–110% browser zoom, hide bookmarks bar.  
-- **Mic:** test levels; room quiet.  
-- **Snowflake:** confirm header shows **Snowflake live** (not “Offline demo”) on `/` and `/copilot`.
-
-### Slide deck (8 slides — build from `docs/ONE_PAGER.md`)
-
-| # | Title | Content |
-|---|--------|---------|
-| 1 | Sentinel · Codeanigans | Theme 1, Aarohan Finance (synthetic NBFC), one-line tagline |
-| 2 | The problem | Fragmented AML desk: spreadsheets, email, FIU portal, no audit trail |
-| 3 | The loop | **See → Ask → Investigate → File → Audit** (diagram) |
-| 4 | Architecture | Next.js + CoWork → `SENTINEL_AGENT` → Analyst + Search → STR + audit |
-| 5 | Screenshot | Command center KPIs |
-| 6 | Screenshot | Copilot with tool chips + citations |
-| 7 | Screenshot | STR download + audit row |
-| 8 | Thank you | Repo URL, team names, synthetic data disclaimer |
-
-### Copilot UI cheat sheet (what to point at in Next.js)
-
-The copilot does **not** render SQL result grids. It shows:
-
-- **Confidence** badge · **Cortex Agent** badge  
-- **Tool chips** — e.g. `Cortex Analyst`, `Regulatory Search`, `Call Search`  
-- **Answer text** — bullets and headings (markdown-lite)  
-- **Generated Cortex Analyst SQL** — expand the `<details>` block  
-- **Citation chips** — Analytics · Regulation · Evidence  
-- **Case links** and **Open STR factory** when applicable  
-
-Say: *“The analyst sees the narrative, the SQL behind it, and the document IDs—not a black box.”*
-
----
-
-## FULL SCRIPT — beat by beat
-
-Timestamps are targets for a **~7 min** take; edit waits in post.
-
----
-
-### SEGMENT 0 · Slide 1 — Title (0:00–0:20)
-
-**On screen:** Slide 1 fullscreen.
-
-**Say:**
-
-> “Hi—we’re **Codeanigans**. This is **Sentinel**: a risk, fraud, and regulatory intelligence copilot for Indian **NBFCs**, built for the Snowflake **CoCo CLI** hackathon, **Theme 1**. Everything you’ll see uses **synthetic** data for a fictional lender, **Aarohan Finance**. I’ll show the problem on one slide, then walk the live desk on Snowflake.”
-
-**Do:** `Esc` or `Alt+Tab` to browser tab 2 (app). Do **not** advance through all slides now.
-
----
-
-### SEGMENT 1 · Slide 2 — Problem (0:20–0:45)
-
-**On screen:** Slide 2 (problem).
-
-**Say:**
-
-> “Today, **MLRO** and AML teams jump between dashboards, case tools, email, and the **FIU-IND** portal. They stitch **transactions**, **relationship-manager notes**, and **RBI / PMLA** guidance by hand—then rebuild the same story for a **Suspicious Transaction Report**. Generic chatbots aren’t acceptable: answers must be **grounded**, **cited**, and **replayable** for audit.”
-
-**Do:** Switch to app → sidebar → **Command center** (`/`).
-
----
-
-### SEGMENT 2 · Live — Command center (0:45–1:25)
-
-**Navigate:** Click **Command center** in the left sidebar if not already there.
-
-**Say while pointing:**
-
-> “This is the **morning desk**. First line—**data source**: we’re on **Snowflake**, schema **SENTINEL.RISK**, not an offline spreadsheet.”
-
-**Point at KPI tiles:**
-
-> “**Open alerts**—the work queue. **Exposure** to flagged activity. **Liquidity coverage** and **runway**—treasury and compliance watch these together at an upper-layer NBFC.”
-
-**Scroll the alert list slowly:**
-
-> “Alerts are **prioritized**. Analysts start here; they don’t start in chat. I’ll open the copilot when an alert needs explanation—but the queue is the system of record for what’s hot.”
-
-**Optional (10 s):** Sidebar → **Liquidity** (`/liquidity`) — “Stress and **LCR** history live in the mart.” → Back to Command center.
-
-**Do:** Sidebar → **Risk copilot** (`/copilot`).
-
----
-
-### SEGMENT 3 · Slide 3 — The loop (1:25–1:40)
-
-**On screen:** Quick flip to Slide 3 (loop: See → Ask → Investigate → File → Audit).
-
-**Say:**
-
-> “Sentinel closes the loop: **see** risk on the dashboard, **ask** in natural language, **investigate** in a case file, **file** an STR pack, **audit** every AI answer. Next I’ll **ask** in our Next.js copilot—then later the **same agent** in Snowflake **CoWork**.”
-
-**Do:** Back to `/copilot`.
-
----
-
-### SEGMENT 4 · Live — Next.js copilot (ONE question) (1:40–3:10)
-
-**On screen:** `/copilot` — empty thread or clear if rehearsing.
-
-**Say:**
-
-> “This page calls the same **Cortex Agent** as Snowflake: **`SENTINEL.RISK.SENTINEL_AGENT`**. Badge should read **Cortex Agent** when we’re live on Snowflake.”
-
-**Type exactly (or click suggestion chip if present):**
+Type this **exactly** in **Risk copilot** first, then the **same text** in **CoWork** while the first answer is still generating:
 
 ```text
 Show mule accounts with cash-outs after 2am
 ```
 
-**On mic while waiting (20–45 s):**
+**On mic you can say:** “Show me accounts linked to **unusual overnight cash activity** after 2 a.m.” — you do **not** need to explain fraud typology names; the data and citations carry the story.
 
-> “The agent is **grounding**—it can run **governed SQL** through our **semantic analytics** layer and search **regulatory** and **call** indexes. We’re not pasting data into ChatGPT; the plan and tools run in Snowflake.”
-
-**When the answer appears, point in order:**
-
-1. **Tool chips** — “**Cortex Analyst** hit the mart; if you see **Regulatory Search**, that’s our RBI/PMLA corpus.”  
-2. **Confidence** — “We surface **high / medium / low**—not every question is equally grounded.”  
-3. **Answer body** — “Read the **facts** first—accounts, amounts, times. Then **interpretation** language—‘warrants review’, not ‘proven guilty’.”  
-4. **Citation chips** — “Every policy claim ties to a **document ID**—for example **DOC-RBI-AML-MULE**—demo corpus, not invented law.”  
-5. **Click** “**Generated Cortex Analyst SQL**” — “Auditors and model risk can inspect the **exact SQL** the analyst path used.”  
-6. **Case links** — “If **CASE-1088** appears, that’s the investigation we’ll open next.”
-
-**Say:**
-
-> “Notice we don’t fake a spreadsheet grid in chat—the **evidence** is prose, **SQL**, and **citations**. Tabular detail lives in **cases** and the **STR pack**.”
-
-**Do not** ask a second question on Next.js in this video.
+**Why this prompt:** Certified on both surfaces; triggers **Cortex Analyst** (SQL on the semantic mart) plus **regulatory search** (e.g. `DOC-RBI-AML-MULE`); often links **CASE-1088** for the case/STR part of the demo.
 
 ---
 
-### SEGMENT 5 · Live — Cases (3:10–3:45)
+## UI map (no separate “Alerts” tab)
 
-**Navigate:** Sidebar → **Cases** → click **CASE-1088** (or link from copilot).
+Sidebar is only:
 
-**Say:**
+| Nav label | Route | Use in video |
+|-----------|--------|----------------|
+| **Command center** | `/` | **Homepage** — scroll KPIs, **Priority queue** (open alerts live here), charts, **Open cases** |
+| **Risk copilot** | `/copilot` | Your **one** NL question |
+| Investigations | `/investigations` | Skip in short video (optional) |
+| Liquidity / Credit risk | `/liquidity`, `/credit` | Optional 5 s from homepage scroll only |
+| **Cases** | `/cases` | List → **CASE-1088** detail |
+| **STR factory** | `/str` | Explain STR + download |
+| Regulations | `/regulations` | Optional one line |
+| **Audit log** | `/audit` | Governance close |
 
-> “Investigation isn’t only chat. **CASE-1088** is a structured **case file**: status, linked customers, timeline.”
-
-**Scroll to relationship-manager / call evidence:**
-
-> “Here’s **unstructured** evidence—a **call transcript** stored in Snowflake, searchable by the agent. Structured transactions plus RM notes in one place.”
-
-**Do:** Sidebar → **STR factory** or URL `/str?caseId=CASE-1088`.
-
----
-
-### SEGMENT 6 · Live — STR factory (3:45–4:20)
-
-**On screen:** STR factory with **CASE-1088** selected.
-
-**Say:**
-
-> “When the bank forms suspicion, India’s **FIU-IND** expects an **STR** within the statutory window. Sentinel generates a **filing pack** from the same mart—not a copy-paste from chat.”
-
-**Show:** Preview sections (narrative, transactions, parties).
-
-**Click:** **Download JSON** (and optionally **Markdown**).
-
-> “**JSON** for systems integration; **Markdown** for the MLRO review. Sample output is also in the repo under **`output/CASE-1088-STR.json`**.”
+**Priority queue** on the homepage **is** the alert work queue—there is no separate Alerts page.
 
 ---
 
-### SEGMENT 7 · Live — Audit log (4:20–4:50)
+## Legend
 
-**Navigate:** Sidebar → **Audit log** (`/audit`).
-
-**Say:**
-
-> “Every copilot question in the app can land in **`SENTINEL.RISK.COPILOT_AUDIT`**—question, full answer, tools, SQL, citations.”
-
-**Expand the latest row** (your mule question if fresh).
-
-> “Internal audit and the **MLRO** can **replay** what the AI said last Tuesday—no shadow AI on a compliance desk.”
-
-**Optional (5 s):** **Regulations** (`/regulations`) — “Indexed circulars—the same sources the agent searches.”
+- **[ACTION]** — what you do on screen (click, scroll, type).  
+- **[SAY]** — what you speak (adjust pace; don’t rush acronyms).  
+- **[TECH]** — optional one-liner if you want extra Snowflake credit (can fold into [SAY]).
 
 ---
 
-### SEGMENT 8 · Slide 4 — Architecture (4:50–5:10)
-
-**On screen:** Slide 4 (architecture diagram from one-pager).
-
-**Say:**
-
-> “Under the hood: **Next.js** desk and **CoWork** both call **`SENTINEL_AGENT`**. Tools: **semantic view** for SQL, **Cortex Search** on calls and regulations, **STR skill** for packs, **audit table** for governance. Built and deployed with **CoCo CLI**—schema, agent YAML, semantic view.”
-
-**Do:** Switch to tab 3 — **CoWork**.
+# SCRIPT
 
 ---
 
-### SEGMENT 9 · Live — CoWork (ONE question + optional abstain) (5:10–6:30)
+## 1 · One-pager intro (~0:45)
 
-**On screen:** Snowflake **CoWork** / **Snowflake Intelligence** chat.
+**[ACTION]** Open the **ONE_PAGER PDF** fullscreen (or browser preview). Scroll slowly through **The problem** and **What Sentinel is** — do **not** read every table; stop before the long object list.
 
-**Verify:** Agent selector shows **`SENTINEL.RISK.SENTINEL_AGENT`** (read FQN on screen).
+**[SAY]**
 
-**Say:**
+> “Hi, we’re **Codeanigans**. This is **Sentinel** — a risk, fraud, and regulatory intelligence copilot for Indian lenders.
+>
+> **NBFC** means **Non-Banking Financial Company** — think a finance company like our demo bank, **Aarohan Finance**, not a full universal bank.
+>
+> Compliance teams run **AML**, **Anti–Money Laundering** controls. The senior lead is the **MLRO**, the **Money Laundering Reporting Officer**.
+>
+> When they suspect crime, India’s **FIU-IND** — the **Financial Intelligence Unit** — expects a filed **STR**, a **Suspicious Transaction Report**, on a defined timeline. They also work under **RBI**, the **Reserve Bank of India**, and laws like **PMLA**, the **Prevention of Money Laundering Act**.
+>
+> Today that work is split across spreadsheets, case tools, email, and portals. **Sentinel** puts the **MLRO desk** on **Snowflake**: see risk, ask questions in English with **citations**, open **cases**, generate an **STR pack**, and **audit** every AI answer. All data in this demo is **synthetic**.”
 
-> “Same **agent name**, same account—this is what GCC teams use in **Snowflake Intelligence** without our custom UI.”
+**[ACTION]** Close or minimize PDF. Open Sentinel in the next tab. Sidebar visible. You should already be on **Command center** (`/`).
 
-**Type a different prompt than Next.js** (pick one you certified):
+---
+
+## 2 · Command center — scroll the homepage (~1:15)
+
+**[ACTION]** Stay on **Command center**. Point at **Mart source banner** (Snowflake · SENTINEL.RISK).
+
+**[SAY]**
+
+> “This is the **command center** — not a slide, live app on **Snowflake**. The banner shows we’re reading the governed mart, not a local Excel file.”
+
+**[ACTION]** Scroll to the **four KPI tiles**: Open alerts, Flagged flow, **LCR**, Largest exposure.
+
+**[SAY]**
+
+> “**Open alerts** — how much is in the queue. **Flagged flow** — volume already marked suspicious in the mart. **LCR** is **Liquidity Coverage Ratio** — can we cover short-term stress. **Largest exposure** — concentration on one name in the credit book.”
+
+**[ACTION]** Scroll through **Treasury watch** / liquidity pulse (dark section). Keep moving—don’t drill into Liquidity tab unless you have time.
+
+**[SAY]**
+
+> “Treasury and compliance share one pane — liquidity pressure alongside fraud signals.”
+
+**[ACTION]** Scroll to **Priority queue** — point at 2–3 rows (IDs, severity, titles). **Do not** click into a separate Alerts page.
+
+**[SAY]**
+
+> “This **priority queue** is the morning worklist — structured **alerts** from the warehouse, scored and sorted. Analysts start here, then deepen in **cases** or the **copilot**.”
+
+**[ACTION]** Briefly show **Ask Sentinel** card and **Open cases** grid at the bottom; hover **CASE-1088** but don’t open yet.
+
+**[SAY]**
+
+> “Hero **investigation cases** are one click away. Next I’ll ask the **risk copilot** the same question we’ll ask in Snowflake **CoWork** — same **Cortex Agent** behind both.”
+
+**[TECH]** Under the hood: KPIs and queue come from tables in `SENTINEL.RISK`; charts read the same mart CoCo helped us build.
+
+---
+
+## 3 · Risk copilot — start the question (~0:20 + wait)
+
+**[ACTION]** Sidebar → **Risk copilot** (`/copilot`). Confirm badge area will show **Cortex Agent** when live.
+
+**[SAY]**
+
+> “**Risk copilot** calls Snowflake **`SENTINEL.RISK.SENTINEL_AGENT`** — a **Cortex Agent**. It doesn’t hallucinate from a blank model: it **plans** which tools to use — **Cortex Analyst** for governed **SQL** on our **semantic view**, and **Cortex Search** for **RAG** — retrieval-augmented generation — over call transcripts and regulatory chunks.”
+
+**[ACTION]** Click in the input box. **Type and submit:**
 
 ```text
-How tight is our LCR and wholesale runoff?
+Show mule accounts with cash-outs after 2am
 ```
 
-**Or:**
+**[SAY]** (while the loading card runs — 20–45 seconds)
+
+> “The agent is running **inside Snowflake** — same path judges certified in our repo. I’ll open **CoWork** and ask the **identical question** so you see GCC teams can use **Snowflake Intelligence** without our custom UI.”
+
+---
+
+## 4 · CoWork — same query in parallel (~0:45 + wait)
+
+**[ACTION]** Switch browser tab to **Snowflake CoWork** / **Snowflake Intelligence**. Confirm agent **`SENTINEL.RISK.SENTINEL_AGENT`**.
+
+**[SAY]**
+
+> “**CoWork** is Snowflake’s agent chat. **Same agent name**, same account — not a second chatbot we trained elsewhere.”
+
+**[ACTION]** Paste or type the **same prompt**:
 
 ```text
-Which names breach RBI large-exposure norms?
+Show mule accounts with cash-outs after 2am
 ```
 
-**While waiting:**
+**[SAY]** (while CoWork thinks)
 
-> “CoWork runs the identical orchestration—Analyst and Search—not a separate prompt wrapper.”
+> “Parallel question — when this finishes, you’ll see the same class of answer: structured facts from the mart, policy excerpts with **document IDs**, and careful **interpretation** language. We built and deployed this stack with **CoCo**, Snowflake’s **Cortex Code CLI** — schema, semantic layer, search indexes, agent YAML.”
 
-**When answer arrives:**
-
-> “You should see **liquidity metrics** or **Golden Peak / concentration** language plus **DOC-BASEL-LCR** or **DOC-RBI-NBFC-LE**—same governance story as the desk.”
-
-**Optional governance beat (15 s):**
-
-```text
-What is the crypto mining tax rule 2030?
-```
-
-**Say:**
-
-> “Out-of-corpus questions **abstain**—we don’t invent future tax law. That’s required for regulatory AI.”
-
-**Do:** Copy browser URL → save in `docs/judge-runs.md` if not already.
+**[ACTION]** Switch back to **Sentinel /copilot** tab. If Next.js answer is ready, continue Section 5 here. If not, keep light narration on CoWork tab until one surface completes, then show both.
 
 ---
 
-### SEGMENT 10 · Slide 8 — Close (6:30–7:00)
+## 5 · Read the Next.js answer — grounding (~1:00)
 
-**On screen:** Slide 8 (repo, team, disclaimer).
+**[ACTION]** On `/copilot`, with the finished answer visible, point in order:
 
-**Say:**
+1. **Tool chips** — Cortex Analyst, Regulatory Search, Call Search if shown  
+2. **Confidence** badge  
+3. Answer text — facts vs “warrants review”  
+4. **Citation chips** — e.g. `DOC-RBI-AML-MULE`  
+5. Expand **Generated Cortex Analyst SQL**  
+6. **Case** link if **CASE-1088** appears  
 
-> “**Sentinel** by **Codeanigans**—Theme 1 on Snowflake: dashboard, evidence-first copilot in **Next.js** and **CoWork**, case files, **STR** packs, audit trail. Code, agent definition, and sample STR on **GitHub**. All customer data is **synthetic**. Thank you.”
+**[SAY]**
 
-**End card text:** `github.com/anshulbanwala/Codeanigans` · Theme 1 · Codeanigans
+> “**Grounding**: tools ran before the prose. **Cortex Analyst** generated SQL against our **semantic model** — business definitions for alerts, transactions, customers — not raw guesswork. **Cortex Search** is the **RAG** layer: it retrieved regulatory and call evidence; citations like **DOC-RBI-AML-MULE** are IDs in our indexed corpus, not invented RBI text.
+>
+> We show **SQL** for audit. The UI is narrative plus citations — not a fake Excel grid — tabular detail lives in **cases** and the **STR pack**.”
 
----
+**[ACTION]** Flip to **CoWork** tab; show its completed answer briefly (same prompt).
 
-## Slide ↔ live map (quick reference)
+**[SAY]**
 
-| When | Slide | Live route |
-|------|-------|------------|
-| Open | 1 Title | — |
-| Problem | 2 | → `/` Command center |
-| Loop | 3 | → `/copilot` (one question) |
-| — | — | → `/cases/CASE-1088` → `/str?caseId=CASE-1088` → `/audit` |
-| Architecture | 4 | → CoWork (one question + optional abstain) |
-| Close | 8 | — |
-
-Slides **5–7** are **backup** for judges who only open the PDF—they match screenshots you take from the live run.
+> “Same question, same agent family — **desk** or **CoWork**, one governance model.”
 
 ---
 
-## Prompt assignment (do not swap)
+## 6 · Cases — list and CASE-1088 detail (~0:50)
 
-| Surface | Prompt | Why |
-|---------|--------|-----|
-| **Next.js** `/copilot` | `Show mule accounts with cash-outs after 2am` | Shows Analyst + AML doc + case link; certified in `judge-runs.md` |
-| **CoWork** | `How tight is our LCR and wholesale runoff?` **or** large-exposure prompt | Proves second domain on **same agent** without repeating mule |
-| **CoWork** (optional) | `Abstain test: crypto mining tax rule 2030` | Governance |
+**[ACTION]** Sidebar → **Cases** (`/cases`). Scroll the list.
+
+**[SAY]**
+
+> “Investigations are **cases** — durable records, not chat history.”
+
+**[ACTION]** Open **CASE-1088** (`/cases/CASE-1088`).
+
+**[SAY]**
+
+> “Here’s the **case file**: customers, accounts, **transactions**, related **alerts**, and **relationship-manager call transcripts** — unstructured evidence stored in Snowflake and searchable by the agent.”
+
+**[ACTION]** Scroll to a **call transcript** block; read one short quote.
+
+**[SAY]**
+
+> “That call is **unstructured** evidence alongside **structured** payments — exactly what Theme 1 asks for.”
+
+---
+
+## 7 · STR factory — what an STR is + download (~0:55)
+
+**[ACTION]** Sidebar → **STR factory** (`/str`). Ensure **CASE-1088** is selected (or open `/str?caseId=CASE-1088`).
+
+**[SAY]**
+
+> “An **STR**, **Suspicious Transaction Report**, is what the bank files with **FIU-IND** when suspicion is formed — narrative, parties, transactions, indicators — not a chat summary.
+>
+> **Sentinel** produces a **filing pack**: **JSON** for systems and **Markdown** for **MLRO** review, built from the same mart and case.”
+
+**[ACTION]** Scroll the preview. Click **Download JSON** (and **Markdown** if time).
+
+**[SAY]**
+
+> “Sample output is in our GitHub under `output/CASE-1088-STR.json` for judges who don’t run the app.”
+
+**[TECH]** STR assembly uses our agent **skill** and governed tables — regulatory **output**, not only Q&A.
+
+---
+
+## 8 · Audit log (~0:35)
+
+**[ACTION]** Sidebar → **Audit log** (`/audit`). Expand the latest row (your copilot question).
+
+**[SAY]**
+
+> “Every copilot turn can persist to **`COPILOT_AUDIT`** — question, full answer, tools, **SQL**, citations. Internal audit and the **MLRO** can **replay** decisions — required for enterprise AI in compliance.”
+
+---
+
+## 9 · Close (~0:25)
+
+**[ACTION]** Optional: **Regulations** (`/regulations`) — one scroll. Or return to **Command center** and stop on homepage.
+
+**[SAY]**
+
+> “**Sentinel** by **Codeanigans**: Theme 1 on Snowflake — **Cortex Agent**, **Analyst**, **Search RAG**, **STR** factory, **audit**. **Next.js** for the desk, **CoWork** for teams in Snowflake UI. Repo: **github.com/anshulbanwala/Codeanigans**. Synthetic data only. Thank you.”
+
+---
+
+## Acronym cheat sheet (first use in video)
+
+| Say this | Means |
+|----------|--------|
+| NBFC | Non-Banking Financial Company |
+| AML | Anti–Money Laundering |
+| MLRO | Money Laundering Reporting Officer |
+| FIU-IND | Financial Intelligence Unit — India |
+| STR | Suspicious Transaction Report |
+| RBI | Reserve Bank of India |
+| PMLA | Prevention of Money Laundering Act |
+| KYC | Know Your Customer |
+| LCR | Liquidity Coverage Ratio |
+| RAG | Retrieval-augmented generation (search then answer) |
+| CoCo | Snowflake Cortex Code CLI (build/deploy assistant) |
+| CoWork | Snowflake Intelligence / in-account agent chat |
 
 ---
 
 ## Recording checklist
 
-- [ ] Slide deck exported (PDF for Hack2skill + presenter mode for video)  
-- [ ] `/api/health` ok · Snowflake banner on `/` and `/copilot`  
-- [ ] Next.js: **one** copilot Q — tools, SQL details, citations shown  
+- [ ] ONE_PAGER PDF — problem + solution only (~45 s)  
+- [ ] Homepage scroll — KPIs, **Priority queue**, open cases (no Alerts tab)  
+- [ ] **Same prompt** on `/copilot` and CoWork  
+- [ ] Tool chips, citations, SQL expanded on Next.js answer  
+- [ ] CoWork answer shown  
 - [ ] CASE-1088 + one call line  
-- [ ] STR JSON downloaded  
+- [ ] STR explained + download  
 - [ ] Audit row expanded  
-- [ ] CoWork: **one** non-mule prompt + agent FQN visible  
-- [ ] CoWork abstain (recommended)  
-- [ ] 8-slide PDF uploaded separately from video  
+- [ ] Snowflake / Cortex / RAG / CoCo mentioned naturally  
 
 ---
 
-## 3-minute emergency cut
+## Edit notes
 
-Slide 1 (10 s) → `/` (20 s) → `/copilot` mule only (60 s) → CASE-1088 (15 s) → STR download (20 s) → `/audit` (15 s) → CoWork LCR or abstain (40 s) → Slide 8 (10 s).
-
----
-
-## Terms (say full form once)
-
-| Term | Meaning |
-|------|---------|
-| **NBFC** | Non-Banking Financial Company (Aarohan Finance) |
-| **AML** | Anti–money laundering |
-| **MLRO** | Money Laundering Reporting Officer |
-| **FIU-IND** | Financial Intelligence Unit — India |
-| **STR** | Suspicious Transaction Report |
-| **RBI** | Reserve Bank of India |
-| **PMLA** | Prevention of Money Laundering Act |
-| **KYC** | Know Your Customer |
-| **LCR** | Liquidity Coverage Ratio |
-| **CoCo** | Snowflake Cortex Code CLI |
-| **CoWork** | Snowflake Intelligence / agent chat in the Snowflake UI |
+- Trim **duplicate wait** between Next.js and CoWork; keep **both finished answers** on screen for a few seconds each.  
+- If one surface is slow, narrate **[TECH]** lines over the spinner rather than going back to the PDF.  
+- **5½ min** target: shorten Treasury watch and Regulations; keep copilot + STR + audit.
