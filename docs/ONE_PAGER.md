@@ -103,7 +103,7 @@ Live app path: `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` from `/api/copilot`.
 - **Stay honest** — When a question is outside the governed corpus (e.g. fictional future tax rules), Sentinel declines instead of inventing policy.  
 - **Run on Snowflake end-to-end** — Same Cortex Agent in the web app, CoWork / Snowflake Intelligence, and optional Streamlit companion—one agent, one mart, one audit trail.
 
-Proof artifacts in repo: **`docs/judge-runs.md`** · **`output/CASE-1088-STR.json`**
+Proof artifacts in repo: **`docs/judge-runs.md`** (7/7 Pass — Next.js + CoWork) · **`output/CASE-1088-STR.json`**
 
 ---
 

@@ -108,8 +108,8 @@ Artifacts land in `output/` (see `output/README.md`). Commit sample JSON **witho
 ## Demo day
 
 1. `docs/demo-warmup.md` — 2 minutes before recording.
-2. `docs/judge-runs.md` — certify all prompts.
-3. `docs/SHIP_CHECKLIST.md` — submission pack.
+2. `docs/judge-runs.md` — certify all prompts + submission pack.
+3. `docs/DEMO_SCRIPT.md` — record video (slides + live app + CoWork).
 
 ---
 

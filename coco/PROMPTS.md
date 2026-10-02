@@ -116,4 +116,4 @@ The deployed object names are:
 - Search services: `SENTINEL.RISK.CALL_SEARCH`, `SENTINEL.RISK.REG_DOC_SEARCH`
 - Audit table: `SENTINEL.RISK.COPILOT_AUDIT`
 
-The Next.js app uses the same agent FQN through `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`. Before recording, run the six prompts above in CoWork, then repeat at least one in `/copilot` and confirm a new row appears in `/audit`.
+The Next.js app uses the same agent FQN through `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`. Before recording, confirm `docs/judge-runs.md` shows **7/7 Pass** on CoWork and Next.js; after a live `/copilot` question, confirm a new row appears in `/audit`.

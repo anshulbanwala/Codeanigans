@@ -53,14 +53,12 @@ cortex
 
 ## Docs
 
-- [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — **award demo video script** (3–5 min).
-- [docs/HOW_TO_FILL_SUBMISSION.md](docs/HOW_TO_FILL_SUBMISSION.md) — **step-by-step** (judge-runs, PDF, video, Hack2skill).
-- [docs/ONE_PAGER.md](docs/ONE_PAGER.md) — **1-pager source** (technical; export to PDF).
-- [docs/SHIP_CHECKLIST.md](docs/SHIP_CHECKLIST.md) — **final shipping** (submission pack + gates).
+- [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — **full video script** (slides + Next.js + CoWork).
+- [docs/ONE_PAGER.md](docs/ONE_PAGER.md) — **1-pager source** (export to PDF for Hack2skill).
+- [docs/judge-runs.md](docs/judge-runs.md) — certify prompts + submission pack checklist.
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Snowflake, Cortex deploy, CoWork, Streamlit, hosting.
 - [scripts/SETUP.md](scripts/SETUP.md) — quick local setup.
-- [docs/HACKATHON.md](docs/HACKATHON.md) — rubric, demo script, hackathon context.
-- [docs/judge-runs.md](docs/judge-runs.md) — certify live agent prompts.
+- [docs/HACKATHON.md](docs/HACKATHON.md) — rubric and hackathon context.
 - [coco/PROMPTS.md](coco/PROMPTS.md) — copy-paste CoCo session.
 
 ## Stack
