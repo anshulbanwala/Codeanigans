@@ -4,7 +4,7 @@
 
 ## [`docs/VIDEO_SCRIPT_FINAL.md`](./VIDEO_SCRIPT_FINAL.md)
 
-That file has the full **ACTION + SAY** text for all 7 scenes (product + CoCo CLI + CoWork + STR + audit).
+That file has the **full end-to-end story**: one-pager, **all sidebar screens**, **CoCo CLI**, copilot + **CoWork**, STR download, audit — with **ACTION + SAY** for each part.
 
 ---
 

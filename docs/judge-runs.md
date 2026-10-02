@@ -47,7 +47,7 @@ Snowflake fix (lead, ACCOUNTADMIN): `node scripts/run-sql-file.mjs snowflake/09_
 
 - [ ] Theme **1** — Risk, Fraud & Regulatory Intelligence Copilot  
 - [ ] Team **Codeanigans** · repo https://github.com/anshulbanwala/Codeanigans  
-- [ ] **3–5 min video** — follow `docs/DEMO_SCRIPT.md` (mixed slides + Next.js + CoWork)  
+- [ ] **3–5 min video** — follow `docs/VIDEO_SCRIPT_FINAL.md` (full story; edit to ≤ 5 min)  
 - [ ] **1-pager PDF** — export `docs/ONE_PAGER.md`  
 - [ ] **Prototype link** — Vercel per `docs/VERCEL.md` or CoWork URL above  
 - [ ] Keep Snowflake objects up through evaluation; no demo-breaking refactors after submit  
