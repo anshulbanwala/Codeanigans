@@ -1,286 +1,350 @@
-# Sentinel — recording script (one-pager + live demo)
+# Sentinel — judge-facing demo script (accurate UI clicks)
 
-**Team:** Codeanigans (Anshul + **mycowdeveloper**)  
-**Event:** Snowflake CoCo CLI Hackathon 2026 — **GCC Edition**, **Theme 1**  
-**Target length:** **5–5½ minutes** (OK to run to ~6 min if copilot waits are trimmed in edit)  
-**What you show:** **`docs/ONE_PAGER.md` as PDF** (intro only) → **Sentinel Next.js app** (full desk) → **Snowflake CoWork** (same agent)  
-**Certified prompts:** `docs/judge-runs.md` — **7/7 Pass** (Next.js + CoWork)
+**Team:** Codeanigans · **Hackathon:** Snowflake CoCo CLI 2026, **GCC Edition**  
+**Theme 1:** Risk, Fraud and Regulatory Intelligence Copilot  
+**Length:** ~5½–7 min (tour + copilot + CoWork; trim pauses in edit)  
+**Opens with:** `docs/ONE_PAGER.md` as **PDF** (problem + solution only)  
+**Then:** Live app — **every sidebar item once (brief)** → **Risk copilot** (one prompt) → **CoWork** (same prompt)
 
-**Before record:** `docs/demo-warmup.md` · `./scripts/preflight.sh` · Snowflake banner on homepage (not “offline demo”)
+**Certified:** `docs/judge-runs.md` — 7/7 on Next.js and CoWork.
 
-| Tab | URL |
-|-----|-----|
-| One-pager PDF | Export from `docs/ONE_PAGER.md` (Print → PDF) |
-| Sentinel | http://127.0.0.1:43127 or Vercel URL |
-| CoWork | Agent `SENTINEL.RISK.SENTINEL_AGENT` — see `docs/judge-runs.md` |
+| Prep | |
+|------|--|
+| App | http://127.0.0.1:43127 or Vercel URL |
+| Header pill | Top-right should show **Snowflake live** (green), not offline |
+| CoWork | Agent `SENTINEL.RISK.SENTINEL_AGENT` — URL in `docs/judge-runs.md` |
+| Warmup | `docs/demo-warmup.md` · `./scripts/preflight.sh` |
 
 ---
 
-## The one copilot question (use on **both** Next.js and CoWork)
+## What reviewers should understand (say once up front)
 
-Type this **exactly** in **Risk copilot** first, then the **same text** in **CoWork** while the first answer is still generating:
+**Theme 1 asks for two things together:**
+
+1. A **copilot** that surfaces **risk and fraud** from enterprise data (structured + unstructured).  
+2. **Audit-ready regulatory output** — not chat alone.
+
+**Sentinel delivers:** Snowflake **mart** → **desk UI** → **Cortex Agent** (Analyst + Search) → **case workflow** → **STR filing pack** → **audit log**. Built with **CoCo CLI** on Snowflake’s AI Data Cloud.
+
+There is **no separate “Alerts” tab**. Open alerts appear on the **Command center** as **Priority queue** and inside **Cases** / **Investigations**.
+
+---
+
+## The one question (Next.js **and** CoWork)
 
 ```text
 Show mule accounts with cash-outs after 2am
 ```
 
-**On mic you can say:** “Show me accounts linked to **unusual overnight cash activity** after 2 a.m.” — you do **not** need to explain fraud typology names; the data and citations carry the story.
-
-**Why this prompt:** Certified on both surfaces; triggers **Cortex Analyst** (SQL on the semantic mart) plus **regulatory search** (e.g. `DOC-RBI-AML-MULE`); often links **CASE-1088** for the case/STR part of the demo.
+Use the **same text** in both places. Start it in **Risk copilot** first; switch to **CoWork** while Next.js is still thinking; come back to show both answers.
 
 ---
 
-## UI map (no separate “Alerts” tab)
+## Sidebar order (this is the real UI)
 
-Sidebar is only:
+Click **only these labels** in the left nav:
 
-| Nav label | Route | Use in video |
-|-----------|--------|----------------|
-| **Command center** | `/` | **Homepage** — scroll KPIs, **Priority queue** (open alerts live here), charts, **Open cases** |
-| **Risk copilot** | `/copilot` | Your **one** NL question |
-| Investigations | `/investigations` | Skip in short video (optional) |
-| Liquidity / Credit risk | `/liquidity`, `/credit` | Optional 5 s from homepage scroll only |
-| **Cases** | `/cases` | List → **CASE-1088** detail |
-| **STR factory** | `/str` | Explain STR + download |
-| Regulations | `/regulations` | Optional one line |
-| **Audit log** | `/audit` | Governance close |
+1. Command center  
+2. Risk copilot *(later — after tour)*  
+3. Investigations  
+4. Liquidity  
+5. Credit risk  
+6. Cases  
+7. STR factory  
+8. Regulations  
+9. Audit log  
 
-**Priority queue** on the homepage **is** the alert work queue—there is no separate Alerts page.
-
----
-
-## Legend
-
-- **[ACTION]** — what you do on screen (click, scroll, type).  
-- **[SAY]** — what you speak (adjust pace; don’t rush acronyms).  
-- **[TECH]** — optional one-liner if you want extra Snowflake credit (can fold into [SAY]).
+Then: **Risk copilot** → **CoWork tab** → optional return to **Audit log**.
 
 ---
 
-# SCRIPT
+## How to read this script
+
+- **ACTION** — exact click / scroll.  
+- **SAY** — your voice track (plain English; spell acronyms **once** when they first appear).  
+- **THEME** — optional line tying to rubric (weave in, don’t read as a list).
 
 ---
 
-## 1 · One-pager intro (~0:45)
+# PART A — One-pager (~40 seconds)
 
-**[ACTION]** Open the **ONE_PAGER PDF** fullscreen (or browser preview). Scroll slowly through **The problem** and **What Sentinel is** — do **not** read every table; stop before the long object list.
+**ACTION** Open ONE_PAGER PDF. Scroll **The problem** and **What Sentinel is**. Stop before the long object table.
 
-**[SAY]**
+**SAY**
 
-> “Hi, we’re **Codeanigans**. This is **Sentinel** — a risk, fraud, and regulatory intelligence copilot for Indian lenders.
+> “We’re **Codeanigans**. **Sentinel** is for **Theme 1**: a **risk, fraud, and regulatory intelligence copilot** for Indian lenders.
 >
-> **NBFC** means **Non-Banking Financial Company** — think a finance company like our demo bank, **Aarohan Finance**, not a full universal bank.
+> Our demo bank is **Aarohan Finance**, an **NBFC** — a **Non-Banking Financial Company**.
 >
-> Compliance teams run **AML**, **Anti–Money Laundering** controls. The senior lead is the **MLRO**, the **Money Laundering Reporting Officer**.
+> Compliance runs **AML** — **Anti–Money Laundering**. The executive owner is the **MLRO** — **Money Laundering Reporting Officer**.
 >
-> When they suspect crime, India’s **FIU-IND** — the **Financial Intelligence Unit** — expects a filed **STR**, a **Suspicious Transaction Report**, on a defined timeline. They also work under **RBI**, the **Reserve Bank of India**, and laws like **PMLA**, the **Prevention of Money Laundering Act**.
+> When the bank suspects financial crime, it may file an **STR** — a **Suspicious Transaction Report** — with **FIU-IND**, India’s **Financial Intelligence Unit**.
 >
-> Today that work is split across spreadsheets, case tools, email, and portals. **Sentinel** puts the **MLRO desk** on **Snowflake**: see risk, ask questions in English with **citations**, open **cases**, generate an **STR pack**, and **audit** every AI answer. All data in this demo is **synthetic**.”
+> Rules come from **RBI** — **Reserve Bank of India** — and laws like **PMLA**, **Prevention of Money Laundering Act**.
+>
+> Teams today use too many tools. **Sentinel** is one **MLRO desk** on **Snowflake**: see risk, investigate, produce a **filing pack**, and **audit** AI. All data here is **synthetic**.”
 
-**[ACTION]** Close or minimize PDF. Open Sentinel in the next tab. Sidebar visible. You should already be on **Command center** (`/`).
+**ACTION** Close PDF. Open Sentinel. Left nav visible.
 
 ---
 
-## 2 · Command center — scroll the homepage (~1:15)
+# PART B — Product tour (click every nav item, ~2½ minutes)
 
-**[ACTION]** Stay on **Command center**. Point at **Mart source banner** (Snowflake · SENTINEL.RISK).
-
-**[SAY]**
-
-> “This is the **command center** — not a slide, live app on **Snowflake**. The banner shows we’re reading the governed mart, not a local Excel file.”
-
-**[ACTION]** Scroll to the **four KPI tiles**: Open alerts, Flagged flow, **LCR**, Largest exposure.
-
-**[SAY]**
-
-> “**Open alerts** — how much is in the queue. **Flagged flow** — volume already marked suspicious in the mart. **LCR** is **Liquidity Coverage Ratio** — can we cover short-term stress. **Largest exposure** — concentration on one name in the credit book.”
-
-**[ACTION]** Scroll through **Treasury watch** / liquidity pulse (dark section). Keep moving—don’t drill into Liquidity tab unless you have time.
-
-**[SAY]**
-
-> “Treasury and compliance share one pane — liquidity pressure alongside fraud signals.”
-
-**[ACTION]** Scroll to **Priority queue** — point at 2–3 rows (IDs, severity, titles). **Do not** click into a separate Alerts page.
-
-**[SAY]**
-
-> “This **priority queue** is the morning worklist — structured **alerts** from the warehouse, scored and sorted. Analysts start here, then deepen in **cases** or the **copilot**.”
-
-**[ACTION]** Briefly show **Ask Sentinel** card and **Open cases** grid at the bottom; hover **CASE-1088** but don’t open yet.
-
-**[SAY]**
-
-> “Hero **investigation cases** are one click away. Next I’ll ask the **risk copilot** the same question we’ll ask in Snowflake **CoWork** — same **Cortex Agent** behind both.”
-
-**[TECH]** Under the hood: KPIs and queue come from tables in `SENTINEL.RISK`; charts read the same mart CoCo helped us build.
+Do **not** deep-dive each screen. **~20–35 seconds per item.** Keep moving.
 
 ---
 
-## 3 · Risk copilot — start the question (~0:20 + wait)
+### B1 · Command center
 
-**[ACTION]** Sidebar → **Risk copilot** (`/copilot`). Confirm badge area will show **Cortex Agent** when live.
+**ACTION** Click **Command center** (first nav item). You land on `/`.
 
-**[SAY]**
+**ACTION** Point at **Mart source banner** under the subtitle (Snowflake · SENTINEL.RISK).
 
-> “**Risk copilot** calls Snowflake **`SENTINEL.RISK.SENTINEL_AGENT`** — a **Cortex Agent**. It doesn’t hallucinate from a blank model: it **plans** which tools to use — **Cortex Analyst** for governed **SQL** on our **semantic view**, and **Cortex Search** for **RAG** — retrieval-augmented generation — over call transcripts and regulatory chunks.”
+**SAY**
 
-**[ACTION]** Click in the input box. **Type and submit:**
+> “**Command center** is the morning view. KPIs are **not** hard-coded in the UI — they’re **SQL over our Snowflake mart**: open alert counts, flagged transaction volume, **LCR** (**Liquidity Coverage Ratio**), and largest **credit exposure** share.”
+
+**ACTION** Scroll down slowly:
+
+- Four **KPI cards** (Open alerts, Flagged flow, LCR, Largest exposure)  
+- Dark **Treasury watch** / liquidity pulse  
+- **Priority queue** (this is the **alert worklist** — IDs, status, scores, titles)  
+- Right card **Ask Sentinel** with example questions  
+- **Channel mix** and **network** charts  
+- **Open cases** grid at the bottom  
+
+**SAY**
+
+> “**Priority queue** is where analysts see **open alerts** — there’s no separate Alerts menu. Below that, **open cases** link into investigations. Everything you see is fed from the same **SENTINEL.RISK** schema we built with **CoCo**.”
+
+**THEME** Surfaces **fraud and liquidity signals** in one pane (relevance).
+
+---
+
+### B2 · Investigations
+
+**ACTION** Click **Investigations**.
+
+**SAY**
+
+> “**Investigations** is a focused desk for our flagship case — here **CASE-1088** — linking **alerts**, a **transaction timeline**, a **network view**, and **call evidence** from the mart.”
+
+**ACTION** Glance at the three stat cards (Active case, Alerts linked, Call artifacts). Scroll the **transaction timeline** and one **call evidence** card. Point at **Open full case file →** (top right) but don’t follow yet.
+
+**SAY**
+
+> “Structured payments plus **unstructured** RM calls — both in Snowflake, both searchable by the agent.”
+
+**THEME** Structured + unstructured intelligence.
+
+---
+
+### B3 · Liquidity
+
+**ACTION** Click **Liquidity**.
+
+**SAY**
+
+> “**Liquidity** is treasury risk: **LCR**, **NSFR** (**Net Stable Funding Ratio**), wholesale **runoff**, and history charts — same mart, different lens. Compliance and ALCO care about this alongside fraud.”
+
+**ACTION** Point at the three metrics and one chart. Optional: click **Ask Sentinel about liquidity →** (you won’t ask yet).
+
+**THEME** Risk is not only fraud — regulatory / prudential context.
+
+---
+
+### B4 · Credit risk
+
+**ACTION** Click **Credit risk**.
+
+**SAY**
+
+> “**Credit risk** shows **concentration** — sector shape, **NPA** signal, names like **Golden Peak** in the copy. Large-exposure questions in the copilot use this book.”
+
+**ACTION** Point at CRE share / Top 20 / sector bars (~5 seconds).
+
+---
+
+### B5 · Cases
+
+**ACTION** Click **Cases**.
+
+**SAY**
+
+> “**Cases** is the system of record: each card is an investigation with status, severity, and summary.”
+
+**ACTION** Click **CASE-1088** (or the mule-ring case). On `/cases/CASE-1088`, scroll once: customers, transactions, related alerts, calls.
+
+**SAY**
+
+> “A **case file** binds entities and evidence — what auditors expect, not a chat thread.”
+
+**ACTION** Click **← Cases** or use nav — don’t linger.
+
+---
+
+### B6 · STR factory
+
+**ACTION** Click **STR factory**.
+
+**SAY**
+
+> “This is Theme 1’s **regulatory output**. An **STR** is the formal **Suspicious Transaction Report** package for **FIU-IND** — subjects, transactions, grounds of suspicion, cited clauses, filing language.”
+
+**ACTION** In the **dropdown**, select **CASE-1088** if needed. Point at the preview card (subjects, transaction schedule, clauses). **Do not download yet** unless you prefer to — download works well **after** the copilot links this case.
+
+**SAY**
+
+> “We generate **JSON** and **Markdown** from the mart — **audit-ready**, not a screenshot of chat.”
+
+**THEME** “Audit-ready regulatory output” requirement.
+
+---
+
+### B7 · Regulations
+
+**ACTION** Click **Regulations**.
+
+**SAY**
+
+> “**Regulatory corpus** lists indexed chunks — **DOC-PMLA-12**, **DOC-RBI-KYC-54**, **DOC-FIU-STR**, and others. The copilot cites these IDs via **Cortex Search** — that’s our **RAG** layer: **retrieval-augmented generation**, search first, then answer.”
+
+**ACTION** Scroll one card (ID, title, excerpt).
+
+---
+
+### B8 · Audit log
+
+**ACTION** Click **Audit log**.
+
+**SAY**
+
+> “**Audit log** stores copilot turns in **`COPILOT_AUDIT`** when live — question, answer, tools, **SQL**, citations. We’ll see a fresh row after we ask the copilot.”
+
+**ACTION** Expand one existing row if present (~5 s). Leave page.
+
+**THEME** Governance / completeness.
+
+---
+
+# PART C — Risk copilot (~1–1½ minutes + wait)
+
+**ACTION** Click **Risk copilot**.
+
+**SAY**
+
+> “Now the **copilot**. The app calls Snowflake **`SENTINEL.RISK.SENTINEL_AGENT`** — a **Cortex Agent**. It chooses tools: **Cortex Analyst** (governed **SQL** on our **semantic view**) and **Cortex Search** (**RAG** on calls and regulations). No generic LLM guessing on raw tables.”
+
+**ACTION** Type and submit:
 
 ```text
 Show mule accounts with cash-outs after 2am
 ```
 
-**[SAY]** (while the loading card runs — 20–45 seconds)
+**SAY** (while loading)
 
-> “The agent is running **inside Snowflake** — same path judges certified in our repo. I’ll open **CoWork** and ask the **identical question** so you see GCC teams can use **Snowflake Intelligence** without our custom UI.”
-
----
-
-## 4 · CoWork — same query in parallel (~0:45 + wait)
-
-**[ACTION]** Switch browser tab to **Snowflake CoWork** / **Snowflake Intelligence**. Confirm agent **`SENTINEL.RISK.SENTINEL_AGENT`**.
-
-**[SAY]**
-
-> “**CoWork** is Snowflake’s agent chat. **Same agent name**, same account — not a second chatbot we trained elsewhere.”
-
-**[ACTION]** Paste or type the **same prompt**:
-
-```text
-Show mule accounts with cash-outs after 2am
-```
-
-**[SAY]** (while CoWork thinks)
-
-> “Parallel question — when this finishes, you’ll see the same class of answer: structured facts from the mart, policy excerpts with **document IDs**, and careful **interpretation** language. We built and deployed this stack with **CoCo**, Snowflake’s **Cortex Code CLI** — schema, semantic layer, search indexes, agent YAML.”
-
-**[ACTION]** Switch back to **Sentinel /copilot** tab. If Next.js answer is ready, continue Section 5 here. If not, keep light narration on CoWork tab until one surface completes, then show both.
+> “I’ll ask the **identical question** in **CoWork** — Snowflake’s in-account agent UI — so GCC teams see the same brain without our Next.js shell.”
 
 ---
 
-## 5 · Read the Next.js answer — grounding (~1:00)
+# PART D — CoWork (~1 minute + wait)
 
-**[ACTION]** On `/copilot`, with the finished answer visible, point in order:
+**ACTION** Switch browser tab to **Snowflake CoWork** / **Snowflake Intelligence**. Confirm agent **`SENTINEL.RISK.SENTINEL_AGENT`**.
 
-1. **Tool chips** — Cortex Analyst, Regulatory Search, Call Search if shown  
-2. **Confidence** badge  
-3. Answer text — facts vs “warrants review”  
-4. **Citation chips** — e.g. `DOC-RBI-AML-MULE`  
-5. Expand **Generated Cortex Analyst SQL**  
-6. **Case** link if **CASE-1088** appears  
+**ACTION** Paste the **same prompt** and send.
 
-**[SAY]**
+**SAY**
 
-> “**Grounding**: tools ran before the prose. **Cortex Analyst** generated SQL against our **semantic model** — business definitions for alerts, transactions, customers — not raw guesswork. **Cortex Search** is the **RAG** layer: it retrieved regulatory and call evidence; citations like **DOC-RBI-AML-MULE** are IDs in our indexed corpus, not invented RBI text.
->
-> We show **SQL** for audit. The UI is narrative plus citations — not a fake Excel grid — tabular detail lives in **cases** and the **STR pack**.”
+> “Same agent FQN, same Snowflake account. **CoCo CLI** is how we deployed schema, search services, semantic layer, and agent YAML.”
 
-**[ACTION]** Flip to **CoWork** tab; show its completed answer briefly (same prompt).
-
-**[SAY]**
-
-> “Same question, same agent family — **desk** or **CoWork**, one governance model.”
+**ACTION** Return to **Risk copilot** tab when the Next.js answer is ready.
 
 ---
 
-## 6 · Cases — list and CASE-1088 detail (~0:50)
+# PART E — Show both answers (~1 minute)
 
-**[ACTION]** Sidebar → **Cases** (`/cases`). Scroll the list.
+**ACTION** On `/copilot`, point in order:
 
-**[SAY]**
+1. **Cortex Agent** badge  
+2. **Tool chips** (Cortex Analyst / Regulatory Search / Call Search)  
+3. **Confidence**  
+4. Answer text — facts vs cautious wording  
+5. **Citation chips** (document IDs)  
+6. Expand **Generated Cortex Analyst SQL**  
+7. **CASE-1088** link if shown  
 
-> “Investigations are **cases** — durable records, not chat history.”
+**SAY**
 
-**[ACTION]** Open **CASE-1088** (`/cases/CASE-1088`).
+> “**Grounding**: tools ran before narrative. **SQL** is visible for model risk. Citations tie to our **Regulations** index. Interpretation stays separate from fact.”
 
-**[SAY]**
+**ACTION** Switch to **CoWork** — show completed answer briefly.
 
-> “Here’s the **case file**: customers, accounts, **transactions**, related **alerts**, and **relationship-manager call transcripts** — unstructured evidence stored in Snowflake and searchable by the agent.”
+**SAY**
 
-**[ACTION]** Scroll to a **call transcript** block; read one short quote.
-
-**[SAY]**
-
-> “That call is **unstructured** evidence alongside **structured** payments — exactly what Theme 1 asks for.”
-
----
-
-## 7 · STR factory — what an STR is + download (~0:55)
-
-**[ACTION]** Sidebar → **STR factory** (`/str`). Ensure **CASE-1088** is selected (or open `/str?caseId=CASE-1088`).
-
-**[SAY]**
-
-> “An **STR**, **Suspicious Transaction Report**, is what the bank files with **FIU-IND** when suspicion is formed — narrative, parties, transactions, indicators — not a chat summary.
->
-> **Sentinel** produces a **filing pack**: **JSON** for systems and **Markdown** for **MLRO** review, built from the same mart and case.”
-
-**[ACTION]** Scroll the preview. Click **Download JSON** (and **Markdown** if time).
-
-**[SAY]**
-
-> “Sample output is in our GitHub under `output/CASE-1088-STR.json` for judges who don’t run the app.”
-
-**[TECH]** STR assembly uses our agent **skill** and governed tables — regulatory **output**, not only Q&A.
+> “Desk and **CoWork** — one governance model, two surfaces.”
 
 ---
 
-## 8 · Audit log (~0:35)
+# PART F — Close the loop (~45 seconds)
 
-**[ACTION]** Sidebar → **Audit log** (`/audit`). Expand the latest row (your copilot question).
+**ACTION** **STR factory** → **CASE-1088** → click **Download JSON** (and **Markdown** if time).
 
-**[SAY]**
+**SAY**
 
-> “Every copilot turn can persist to **`COPILOT_AUDIT`** — question, full answer, tools, **SQL**, citations. Internal audit and the **MLRO** can **replay** decisions — required for enterprise AI in compliance.”
+> “From the same investigation to a **filing pack** judges can open in the repo.”
 
----
+**ACTION** **Audit log** → expand the row for your copilot question.
 
-## 9 · Close (~0:25)
+**SAY**
 
-**[ACTION]** Optional: **Regulations** (`/regulations`) — one scroll. Or return to **Command center** and stop on homepage.
-
-**[SAY]**
-
-> “**Sentinel** by **Codeanigans**: Theme 1 on Snowflake — **Cortex Agent**, **Analyst**, **Search RAG**, **STR** factory, **audit**. **Next.js** for the desk, **CoWork** for teams in Snowflake UI. Repo: **github.com/anshulbanwala/Codeanigans**. Synthetic data only. Thank you.”
+> “**Theme 1** in one flow: **see** risk on the desk, **ask** with grounded AI, **investigate** in cases, **file** an **STR**, **prove** it in **audit**. **Sentinel** by **Codeanigans** — GitHub **anshulbanwala/Codeanigans**. Synthetic data only. Thank you.”
 
 ---
 
-## Acronym cheat sheet (first use in video)
+## Rubric map (for you — don’t read aloud)
 
-| Say this | Means |
-|----------|--------|
-| NBFC | Non-Banking Financial Company |
-| AML | Anti–Money Laundering |
-| MLRO | Money Laundering Reporting Officer |
-| FIU-IND | Financial Intelligence Unit — India |
-| STR | Suspicious Transaction Report |
-| RBI | Reserve Bank of India |
-| PMLA | Prevention of Money Laundering Act |
-| KYC | Know Your Customer |
-| LCR | Liquidity Coverage Ratio |
-| RAG | Retrieval-augmented generation (search then answer) |
-| CoCo | Snowflake Cortex Code CLI (build/deploy assistant) |
-| CoWork | Snowflake Intelligence / in-account agent chat |
+| Criterion | Where you showed it |
+|-----------|---------------------|
+| Real-world relevance 30% | NBFC, MLRO, FIU STR, RBI/PMLA IDs, liquidity + credit + fraud |
+| Technical execution 40% | Snowflake mart, Cortex Agent, Analyst SQL, Search RAG, CoCo, CoWork |
+| Completeness 30% | All nav areas, case file, STR download, audit, abstain optional in CoWork |
+
+**Optional CoWork-only abstain** (if you have 15 s):  
+`What is the crypto mining tax rule 2030?` — must refuse (certified).
+
+---
+
+## Acronym first-use (cheat sheet)
+
+| First time say | Short form after |
+|----------------|------------------|
+| Non-Banking Financial Company (NBFC) | NBFC |
+| Anti–Money Laundering (AML) | AML |
+| Money Laundering Reporting Officer (MLRO) | MLRO |
+| Suspicious Transaction Report (STR) | STR |
+| Financial Intelligence Unit — India (FIU-IND) | FIU |
+| Reserve Bank of India (RBI) | RBI |
+| Prevention of Money Laundering Act (PMLA) | PMLA |
+| Liquidity Coverage Ratio (LCR) | LCR |
+| Net Stable Funding Ratio (NSFR) | NSFR |
+| Retrieval-augmented generation (RAG) | RAG |
+| Cortex Code CLI (CoCo) | CoCo |
 
 ---
 
 ## Recording checklist
 
-- [ ] ONE_PAGER PDF — problem + solution only (~45 s)  
-- [ ] Homepage scroll — KPIs, **Priority queue**, open cases (no Alerts tab)  
-- [ ] **Same prompt** on `/copilot` and CoWork  
-- [ ] Tool chips, citations, SQL expanded on Next.js answer  
-- [ ] CoWork answer shown  
-- [ ] CASE-1088 + one call line  
-- [ ] STR explained + download  
-- [ ] Audit row expanded  
-- [ ] Snowflake / Cortex / RAG / CoCo mentioned naturally  
+- [ ] ONE_PAGER — problem + solution  
+- [ ] All **9** nav items clicked in order (brief)  
+- [ ] Explained **Priority queue** = alerts (no Alerts tab)  
+- [ ] Explained KPIs from **Snowflake mart**  
+- [ ] Same prompt on **Risk copilot** and **CoWork**  
+- [ ] Tools, SQL, citations shown  
+- [ ] STR download + audit row after copilot  
+- [ ] Theme 1 + regulatory **output** stated clearly  
 
 ---
 
-## Edit notes
+## If you run long
 
-- Trim **duplicate wait** between Next.js and CoWork; keep **both finished answers** on screen for a few seconds each.  
-- If one surface is slow, narrate **[TECH]** lines over the spinner rather than going back to the PDF.  
-- **5½ min** target: shorten Treasury watch and Regulations; keep copilot + STR + audit.
+Shorten **Liquidity** and **Credit risk** to 10 s each; keep **Command center**, **Cases**, **STR**, **copilot**, **CoWork**, **audit**.
