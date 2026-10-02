@@ -53,7 +53,8 @@ cortex
 
 ## Docs
 
-- [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — **full video script** (slides + Next.js + CoWork).
+- [docs/VIDEO_SCRIPT_FINAL.md](docs/VIDEO_SCRIPT_FINAL.md) — **Hack2skill video script (3–5 min)** — record this.
+- [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — index to video script + warmup links.
 - [docs/ONE_PAGER.md](docs/ONE_PAGER.md) — **1-pager source** (export to PDF for Hack2skill).
 - [docs/judge-runs.md](docs/judge-runs.md) — certify prompts + submission pack checklist.
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Snowflake, Cortex deploy, CoWork, Streamlit, hosting.
