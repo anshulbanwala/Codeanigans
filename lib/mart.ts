@@ -42,13 +42,6 @@ export type CallTranscript = {
   text: string;
 };
 
-const HERO_CASE_CUSTOMERS: Record<string, string[]> = {
-  "CASE-1042": ["CUS-1042"],
-  "CASE-1088": ["CUS-1088", "CUS-1089", "CUS-1090"],
-  "CASE-1101": ["CUS-1101"],
-  "CASE-1115": ["CUS-1115", "CUS-1116"],
-};
-
 function asAlertStatus(s: string): AlertStatus {
   const v = s.toLowerCase();
   if (v === "open") return "open";
@@ -182,10 +175,6 @@ async function fetchCaseCustomerMap(): Promise<Map<string, string[]>> {
     list.push(row.CUSTOMER_ID);
     map.set(row.CASE_ID, list);
   }
-  for (const [caseId, ids] of Object.entries(HERO_CASE_CUSTOMERS)) {
-    const merged = [...new Set([...(map.get(caseId) ?? []), ...ids])];
-    map.set(caseId, merged);
-  }
   return map;
 }
 
@@ -230,6 +219,11 @@ export async function getCaseById(caseId: string): Promise<MartResult<CaseFile |
   const all = await getCases();
   const found = all.data.find((c) => c.id === caseId) ?? null;
   return { source: all.source, data: found };
+}
+
+export async function getAlertsForCase(caseId: string): Promise<MartResult<Alert[]>> {
+  const all = await getAlerts(300);
+  return { source: all.source, data: all.data.filter((a) => a.caseId === caseId) };
 }
 
 export async function getAlerts(limit = 50): Promise<MartResult<Alert[]>> {
@@ -320,13 +314,20 @@ export async function getTransactionsForCase(
   _caseId: string,
   customerIds: string[],
 ): Promise<MartResult<Transaction[]>> {
+  if (!customerIds.length) {
+    return isSnowflakeConfigured()
+      ? { source: "snowflake", data: [] }
+      : { source: "local", data: [] };
+  }
   if (!isSnowflakeConfigured()) {
-    const accts = localAccounts
+    const accountIds = localAccounts
       .filter((a) => customerIds.includes(a.customerId))
       .map((a) => a.id);
     return {
       source: "local",
-      data: localTransactions.filter((t) => accts.includes(t.accountId)),
+      data: dedupeTransactions(
+        localTransactions.filter((t) => accountIds.includes(t.accountId)),
+      ),
     };
   }
   try {
@@ -343,13 +344,13 @@ export async function getTransactionsForCase(
     return { source: "snowflake", data: dedupeTransactions(rows.map(mapTransaction)) };
   } catch (error) {
     console.error("[mart-transactions]", error);
-    const accts = localAccounts
+    const accountIds = localAccounts
       .filter((a) => customerIds.includes(a.customerId))
       .map((a) => a.id);
     return {
       source: "local",
       data: dedupeTransactions(
-        localTransactions.filter((t) => accts.includes(t.accountId)),
+        localTransactions.filter((t) => accountIds.includes(t.accountId)),
       ),
     };
   }
@@ -358,7 +359,11 @@ export async function getTransactionsForCase(
 export async function getCallsForCustomers(
   customerIds: string[],
 ): Promise<MartResult<CallTranscript[]>> {
-  if (!customerIds.length) return { source: "local", data: [] };
+  if (!customerIds.length) {
+    return isSnowflakeConfigured()
+      ? { source: "snowflake", data: [] }
+      : { source: "local", data: [] };
+  }
   if (!isSnowflakeConfigured()) {
     return {
       source: "local",
@@ -390,7 +395,7 @@ export async function getCallsForCustomers(
     console.error("[mart-calls]", error);
     return {
       source: "local",
-      data: localCalls.filter((c) => customerIds.includes(c.customerId)),
+      data: dedupeCalls(localCalls.filter((c) => customerIds.includes(c.customerId))),
     };
   }
 }

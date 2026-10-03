@@ -1,5 +1,5 @@
 # Optional: deploy to Vercel from GitHub Actions.
-# Prefer Vercel → Import GitHub repo (auto-deploy on push) — see docs/VERCEL.md.
+# Prefer Vercel → Import GitHub repo (auto-deploy on push).
 # This workflow runs only when you manually trigger it AND secrets are set.
 
 name: Vercel Production
@@ -19,7 +19,7 @@ jobs:
         run: |
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
             echo "::error::Missing GitHub secrets. Run ./scripts/vercel-github-setup.sh"
-            echo "Or use Vercel Dashboard import (no Actions needed): docs/VERCEL.md"
+            echo "Or use Vercel Dashboard import (no Actions needed)."
             exit 1
           fi
 

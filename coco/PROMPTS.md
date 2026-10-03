@@ -1,13 +1,11 @@
-# CoCo CLI prompts — run these in order after `cortex`
-
-Install (macOS/Linux):
+# CoCo CLI session — run in order after `cortex`
 
 ```bash
 curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
 cortex
 ```
 
-Use the hackathon Snowflake connection when the wizard asks. Do not commit passwords or private keys.
+Use hackathon Snowflake credentials in the wizard. Do not commit passwords.
 
 ## 0. Privileges
 
@@ -15,105 +13,95 @@ Use the hackathon Snowflake connection when the wizard asks. Do not commit passw
 What privileges does my role have? Can I create databases, Cortex Search services, semantic views, and Cortex Agents?
 ```
 
-If Cortex models 404 in your region:
+If Cortex models 404:
 
 ```sql
--- ACCOUNTADMIN
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'AWS_US';
 ```
 
-## 1. Load the mart
-
-Paste `snowflake/01_schema.sql` first, then:
+## 1. Mart (CoCo-generated)
 
 ```
-Generate realistic synthetic data into SENTINEL.RISK.
+Create database SENTINEL, schema RISK, warehouse SENTINEL_WH (XSMALL, auto-suspend 60s).
 
-Keep the existing seed customers (Rahul Mehta CUS-1042, the Kavya/Imran/Neha mule trio, PEP Vikram Desai, Meru Logistics and Sagar Traders, Golden Peak Realty).
+Create governed tables for an Indian NBFC AML demo: CUSTOMERS, ACCOUNTS, TRANSACTIONS, ALERTS, CASES, CALL_TRANSCRIPTS, REG_DOCS, LIQUIDITY_DAILY, CREDIT_EXPOSURES, COPILOT_AUDIT.
 
-Add:
-- TRANSACTIONS: 800 rows over the last 14 days. ~1.2% fraudulent.
-  Typologies: structuring just under ₹10 lakh CTR, mule cash-out after 02:00 IST, related-party round trip, PEP unusual wealth.
-- ALERTS aligned to those typologies with scores and case ids CASE-1042, CASE-1088, CASE-1101, CASE-1115.
-- CALL_TRANSCRIPTS: 40 short RM / WhatsApp transcripts. Some angry, some coaching mule behaviour.
-- REG_DOCS: keep PMLA CTR, RBI KYC PEPs, FIU-IND STR timing, RBI SBR large exposures, Basel LCR, RBI mule guidance. Add 10 more Indian NBFC circular chunks.
-- LIQUIDITY_DAILY for 30 days ending 2026-08-30, LCR oscillating 102-118.
-- CREDIT_EXPOSURES for 25 names, Golden Peak Realty ~11% of book.
+Seed hero customers: Rahul Mehta CUS-1042, mule trio CUS-1088/1089/1090, PEP Vikram Desai CUS-1101, Meru CUS-1115 and Sagar CUS-1116, Golden Peak Realty CUS-1304.
+
+Generate realistic synthetic data:
+- 800+ TRANSACTIONS over 14 days (~1.2% fraud): structuring under ₹10L CTR, mule cash-out after 02:00 IST, related-party round trip, PEP wealth mismatch.
+- ALERTS for CASE-1042, CASE-1088, CASE-1101, CASE-1115.
+- 40 CALL_TRANSCRIPTS (RM / WhatsApp).
+- REG_DOCS: PMLA CTR, RBI KYC PEP, FIU-IND STR timing, RBI large exposure, Basel LCR, RBI mule guidance + 10 synthetic NBFC chunks.
+- LIQUIDITY_DAILY 30 days, LCR 102–118.
+- CREDIT_EXPOSURES ~25 names, Golden Peak ~11% of book.
 
 Enable change tracking on CALL_TRANSCRIPTS and REG_DOCS.
 ```
 
-Run `snowflake/04_winner_expansion.sql` after the foundation scripts when the account needs the additive winner dataset. It is deterministic and idempotent for its generated IDs; it does not update or delete the original Sentinel scenarios. The script also restores `APP_DEVELOPER` grants after agent/semantic deployments.
+After the mart exists, upsert the four Investigations hero cases (idempotent):
+
+```bash
+node scripts/seed-hero-cases.mjs
+```
+
+This MERGEs CASE-1042, CASE-1088, CASE-1101, CASE-1115 plus linked customers, accounts, alerts, transactions, and call transcripts into `SENTINEL.RISK` so the Next.js app reads them only from Snowflake.
 
 ## 2. Cortex Search
 
 ```
-Create a Cortex Search service called CALL_SEARCH on SENTINEL.RISK.CALL_TRANSCRIPTS transcript_text with attributes customer_id using warehouse SENTINEL_WH.
+Create Cortex Search service CALL_SEARCH on SENTINEL.RISK.CALL_TRANSCRIPTS (transcript_text, attributes customer_id, call_id) using SENTINEL_WH.
 
-Create a Cortex Search service called REG_DOC_SEARCH on SENTINEL.RISK.REG_DOCS excerpt with attributes title, topic, clause using warehouse SENTINEL_WH.
+Create REG_DOC_SEARCH on SENTINEL.RISK.REG_DOCS (excerpt, attributes title, topic, clause, doc_id) using SENTINEL_WH.
 ```
 
-## 3. Semantic view (uses the semantic-view skill)
+## 3. Semantic view
 
 ```
-Using the semantic-view skill, create a Semantic View named SENTINEL.RISK.RISK_ANALYTICS for Cortex Analyst on TRANSACTIONS, ALERTS, CUSTOMERS, LIQUIDITY_DAILY and CREDIT_EXPOSURES.
+Using the semantic-view skill, create SENTINEL.RISK.RISK_ANALYTICS on TRANSACTIONS, ALERTS, CUSTOMERS, LIQUIDITY_DAILY, CREDIT_EXPOSURES.
 
-Business terms:
-- CTR threshold means ₹10 lakh cash, integrally connected
-- mule means inbound then cash-out under 60 minutes
-- LCR, NSFR, HQLA, CET1, RWA, large exposure as RBI/Basel define them
-Add verified queries for: open alerts by typology, structuring just under 10 lakh, mule cash-outs after 2am, LCR last 14 days, names above 10% of book.
+Business terms: CTR ₹10 lakh cash; mule = inbound then cash-out within 60 minutes; large exposure >10% of book.
+
+Add verified queries: open alerts by typology; structuring under 10 lakh; mule cash-outs after 2am; LCR last 14 days; names above 10% of book.
 ```
 
-## 4. Cortex Agent (uses the cortex-agent skill)
+## 4. Cortex Agent
 
 ```
-Using the cortex-agent skill, create an agent SENTINEL.RISK.SENTINEL_AGENT.
+Using the cortex-agent skill, create agent SENTINEL.RISK.SENTINEL_AGENT with:
+- risk_analytics on SENTINEL.RISK.RISK_ANALYTICS
+- reg_doc_search on REG_DOC_SEARCH
+- call_search on CALL_SEARCH
 
-Tools:
-- cortex_analyst on semantic view SENTINEL.RISK.RISK_ANALYTICS
-- cortex_search on CALL_SEARCH and REG_DOC_SEARCH
-
-Persona: You are the MLRO copilot for Aarohan Finance, an Indian NBFC.
-Routing: metrics, counts, LCR, RWA, amounts → Analyst. Transcripts, circulars, grounds of suspicion → Search.
-Output: cite SQL or clause. If you cannot ground the answer, abstain.
-If suspicion is established, offer to emit an FIU-IND STR pack (subjects, transaction schedule, clauses, 7 working day clock).
-Never invent a regulation. Never unmask PAN in Slack-like channels; only in the STR pack.
-Deploy the agent to Snowflake CoWork.
+MLRO persona for Aarohan Finance. Route metrics to Analyst, policy/transcripts to Search. Cite SQL or clauses; abstain if ungrounded. Offer FIU-IND STR pack when suspicion is established. Deploy to CoWork.
 ```
 
-## 5. Test questions (judges will ask variants)
+Or deploy from repo YAML:
 
-```
-Chat with agent SENTINEL.RISK.SENTINEL_AGENT and ask: Show mule accounts with cash-outs after 2am
-Ask: Is Rahul Mehta structuring under the ₹10L CTR?
-Ask: How tight is our LCR and wholesale runoff?
-Ask: Which names breach RBI large-exposure norms?
-Ask: What does RBI require for PEP enhanced due diligence?
-Ask: Draft the FIU-IND STR pack that is due this week
+```bash
+./scripts/deploy-cortex.sh
 ```
 
-## 6. Streamlit in Snowflake (optional second surface)
+## 5. Demo prompts
 
 ```
-Build a Streamlit-in-Snowflake app on SENTINEL.RISK that mirrors the local Next.js command center: KPIs, alert queue, copilot chat against SENTINEL_AGENT, and an STR download. Upload it and give me the URL.
+Chat with SENTINEL.RISK.SENTINEL_AGENT:
+- Show mule accounts with cash-outs after 2am
+- Is Rahul Mehta structuring under the ₹10L CTR?
+- How tight is our LCR and wholesale runoff?
+- Which names breach RBI large-exposure norms?
+- What does RBI require for PEP enhanced due diligence?
+- Draft the FIU-IND STR pack that is due this week
 ```
 
-## 7. Custom skill (show CoCo extensibility)
+## 6. Custom skill
 
 ```
-Create a custom skill .coco/skills/str-factory/SKILL.md that, given a CASE_ID, queries TRANSACTIONS + CALL_TRANSCRIPTS + REG_DOCS and writes a FINNet-style STR markdown + JSON to ./output/.
+Use coco/skills/str-factory/SKILL.md to generate FINNet-style STR markdown + JSON for CASE-1042 into ./output/
 ```
 
-The skill file in this repo is already drafted at `coco/skills/str-factory/SKILL.md`.
+## 7. App role (after agent deploy)
 
-## 8. Verification record
-
-The deployed object names are:
-
-- Agent: `SENTINEL.RISK.SENTINEL_AGENT`
-- Semantic view: `SENTINEL.RISK.RISK_ANALYTICS`
-- Search services: `SENTINEL.RISK.CALL_SEARCH`, `SENTINEL.RISK.REG_DOC_SEARCH`
-- Audit table: `SENTINEL.RISK.COPILOT_AUDIT`
-
-The Next.js app uses the same agent FQN through `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`. Before recording, confirm `docs/judge-runs.md` shows **7/7 Pass** on CoWork and Next.js; after a live `/copilot` question, confirm a new row appears in `/audit`.
+```
+Grant role APP_DEVELOPER usage on warehouse SENTINEL_WH, database SENTINEL, schema RISK, select on mart tables, insert on COPILOT_AUDIT, usage on agent SENTINEL.RISK.SENTINEL_AGENT, semantic view RISK_ANALYTICS, and both search services.
+```

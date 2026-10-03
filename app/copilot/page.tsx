@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,7 @@ import { suggestedPrompts } from "@/lib/engine";
 import type { CopilotResponse } from "@/lib/types";
 import { appendAudit } from "@/lib/audit-client";
 import { MarkdownAnswer } from "@/components/markdown-answer";
+import { CopilotDataTables, CopilotSearchHits } from "@/components/copilot-evidence";
 
 type Turn = {
   id: string;
@@ -19,12 +21,20 @@ type Turn = {
 };
 
 export default function CopilotPage() {
+  const searchParams = useSearchParams();
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const turnSeq = useRef(0);
+  const urlQuestion = searchParams.get("q")?.trim() ?? "";
+  const [syncedUrlQ, setSyncedUrlQ] = useState(urlQuestion);
+  if (urlQuestion && urlQuestion !== syncedUrlQ) {
+    setSyncedUrlQ(urlQuestion);
+    setInput(urlQuestion);
+  }
 
   useEffect(() => {
     threadEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -51,7 +61,8 @@ export default function CopilotPage() {
     const q = question.trim();
     if (!q || busy) return;
 
-    const turnId = `turn-${Date.now()}`;
+    turnSeq.current += 1;
+    const turnId = `turn-${turnSeq.current}`;
     setInput("");
     setError(null);
     setElapsedSeconds(0);
@@ -184,6 +195,15 @@ export default function CopilotPage() {
                       <Badge variant="outline" className={confidenceClass(t.a.confidence)}>confidence {t.a.confidence}</Badge>
                       {t.a.strReady && <Badge>STR-ready</Badge>}
                     </div>
+                    {t.a.confidenceReason && (
+                      <p className="text-[11px] text-muted-foreground">{t.a.confidenceReason}</p>
+                    )}
+                    {t.a.engine === "local-fallback" && (
+                      <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-900 dark:text-amber-100">
+                        Live Cortex agent was unavailable — showing offline narrative.
+                        {t.a.agentError ? ` (${t.a.agentError})` : ""}
+                      </p>
+                    )}
                 <div className="flex flex-wrap gap-1.5">
                   {t.a.engine && (
                     <Badge variant="outline" className="text-[10px]">
@@ -198,6 +218,12 @@ export default function CopilotPage() {
                     <Badge variant="secondary" className="text-[10px]">demo cache</Badge>
                   )}
                 </div>
+                    {t.a.dataTables && t.a.dataTables.length > 0 && (
+                      <CopilotDataTables tables={t.a.dataTables} />
+                    )}
+                    {t.a.searchHits && t.a.searchHits.length > 0 && (
+                      <CopilotSearchHits hits={t.a.searchHits} />
+                    )}
                     {t.a.toolsUsed && t.a.toolsUsed.length > 0 && (
                       <div className="flex flex-wrap gap-1.5" aria-label="Grounding tools used">
                         {t.a.toolsUsed.map((tool, toolIndex) => (

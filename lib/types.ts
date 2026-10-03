@@ -97,15 +97,32 @@ export type CopilotCitation = {
   detail: string;
 };
 
+export type CopilotDataTable = {
+  title: string;
+  columns: string[];
+  rows: string[][];
+};
+
+export type CopilotSearchHit = {
+  kind: "regulation" | "call";
+  id: string;
+  title: string;
+  snippet: string;
+  meta?: string;
+};
+
 export type CopilotResponse = {
   answer: string;
   bullets: string[];
   citations: CopilotCitation[];
   sql?: string;
+  dataTables?: CopilotDataTable[];
+  searchHits?: CopilotSearchHit[];
   relatedCaseIds: string[];
   relatedAlertIds: string[];
   strReady?: boolean;
   confidence: "high" | "medium" | "low";
+  confidenceReason?: string;
   toolsUsed?: string[];
   engine?: "agent" | "local-fallback" | "local";
   auditLogged?: boolean;

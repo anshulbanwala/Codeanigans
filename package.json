@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "certify:prompts": "node scripts/certify-judge-prompts.mjs",
     "dev": "next dev --hostname 127.0.0.1 --port 43127",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 43127",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:hero": "node scripts/seed-hero-cases.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

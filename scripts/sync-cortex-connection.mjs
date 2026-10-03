@@ -11,6 +11,11 @@ for (const line of readFileSync(envPath, "utf8").split("\n")) {
   if (i === -1) continue;
   env[t.slice(0, i).trim()] = t.slice(i + 1).trim();
 }
+for (const key of Object.keys(process.env)) {
+  if (key.startsWith("SNOWFLAKE_") && process.env[key]) {
+    env[key] = process.env[key];
+  }
+}
 
 const required = ["SNOWFLAKE_ACCOUNT", "SNOWFLAKE_USER", "SNOWFLAKE_PASSWORD"];
 for (const key of required) {

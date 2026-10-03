@@ -15,7 +15,13 @@ export default function StrFactory() {
   const [caseOptions, setCaseOptions] = useState<CaseOption[]>(
     localCases.map((c) => ({ id: c.id, title: c.title })),
   );
-  const [id, setId] = useState(searchParams.get("caseId") ?? localCases[0]?.id ?? "");
+  const caseIdFromUrl = searchParams.get("caseId");
+  const [id, setId] = useState(caseIdFromUrl ?? localCases[0]?.id ?? "");
+  const [syncedCaseParam, setSyncedCaseParam] = useState(caseIdFromUrl);
+  if (caseIdFromUrl && caseIdFromUrl !== syncedCaseParam) {
+    setSyncedCaseParam(caseIdFromUrl);
+    setId(caseIdFromUrl);
+  }
   const [pack, setPack] = useState<StrPack | null>(null);
   const [source, setSource] = useState<"snowflake" | "local" | "loading">("loading");
   const [error, setError] = useState<string | null>(null);
@@ -34,11 +40,6 @@ export default function StrFactory() {
         // keep local fallback list
       });
   }, []);
-
-  useEffect(() => {
-    const paramId = searchParams.get("caseId");
-    if (paramId) setId(paramId);
-  }, [searchParams]);
 
   const loadPack = useCallback(async (caseId: string) => {
     setSource("loading");
@@ -65,7 +66,11 @@ export default function StrFactory() {
   }, []);
 
   useEffect(() => {
-    if (id) void loadPack(id);
+    if (!id) return;
+    const handle = window.setTimeout(() => {
+      void loadPack(id);
+    }, 0);
+    return () => window.clearTimeout(handle);
   }, [id, loadPack]);
 
   function downloadJson() {

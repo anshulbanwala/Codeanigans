@@ -1,5 +1,15 @@
+import {
+  extractEvidenceFromToolResult,
+  mergeDataTables,
+  parseConfidenceFromAnswer,
+} from "@/lib/agent-evidence";
 import { executeQuery } from "@/lib/snowflake";
-import type { CopilotResponse, CopilotCitation } from "@/lib/types";
+import type {
+  CopilotDataTable,
+  CopilotResponse,
+  CopilotCitation,
+  CopilotSearchHit,
+} from "@/lib/types";
 
 const AGENT_FQN = "SENTINEL.RISK.SENTINEL_AGENT";
 
@@ -84,11 +94,22 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
     allTextBlocks.at(-1) ||
     "Agent completed without a user-facing text response.";
 
+  const dataTables: CopilotDataTable[] = [];
+  const searchHits: CopilotSearchHit[] = [];
+
   for (const block of raw.content) {
     if (block.type !== "tool_result") continue;
 
     const tr = block.tool_result;
     if (!tr.content) continue;
+
+    const extracted = extractEvidenceFromToolResult({
+      name: tr.name ?? "",
+      status: tr.status,
+      content: tr.content,
+    });
+    dataTables.push(...extracted.tables);
+    searchHits.push(...extracted.searchHits);
 
     let searchCitationAdded = false;
 
@@ -113,12 +134,19 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
         citations.set(`doc:${tr.name}`, {
           kind: "doc",
           label: tr.name,
-          detail: tr.status === "success" ? "Search completed" : tr.status,
+          detail:
+            extracted.searchHits.length > 0
+              ? `${extracted.searchHits.length} grounded hit(s)`
+              : tr.status === "success"
+                ? "Search completed"
+                : tr.status,
         });
         searchCitationAdded = true;
       }
     }
   }
+
+  const mergedTables = mergeDataTables(dataTables);
 
   const sql = sqlStatements.length
     ? sqlStatements.join("\n\n-- Next Cortex Analyst query --\n\n")
@@ -138,17 +166,26 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
     }
   }
 
-  // Determine confidence based on agent completion and tool usage
-  const usedTools = raw.content.some((b) => b.type === "tool_result");
-  const abstained =
-    /abstain/i.test(answer) ||
-    /could not ground/i.test(answer) ||
-    /cannot ground/i.test(answer);
-  const confidence: CopilotResponse["confidence"] = abstained
-    ? "low"
-    : usedTools
-      ? "high"
-      : "medium";
+  const toolsUsedNames = extractToolsUsed(raw);
+  const usedAnalyst = toolsUsedNames.some(
+    (t) => t.includes("analyst") || t.includes("risk_analytics") || t.includes("execute_sql"),
+  );
+  const usedSearch = toolsUsedNames.some((t) => t.includes("search"));
+
+  const confidenceReasonMatch = answer.match(
+    /confidence:\s*(high|medium|low)\s*[—–-]\s*(.+?)(?:\n|$)/i,
+  );
+  const confidence = parseConfidenceFromAnswer(answer, {
+    toolCount: toolsUsedNames.length,
+    hasSql: sqlStatements.length > 0,
+    tableRowCount: mergedTables.reduce((n, t) => n + t.rows.length, 0),
+    searchHitCount: searchHits.length,
+    caseCount: caseIds.size,
+    alertCount: alertIds.size,
+    usedAnalyst,
+    usedSearch,
+  });
+  const confidenceReason = confidenceReasonMatch?.[2]?.trim();
 
   // Check STR readiness
   const strReady =
@@ -160,10 +197,13 @@ function parseAgentResponse(raw: AgentResponse): CopilotResponse {
     bullets,
     citations: [...citations.values()],
     sql,
+    dataTables: mergedTables.length ? mergedTables : undefined,
+    searchHits: searchHits.length ? searchHits : undefined,
     relatedCaseIds: [...caseIds],
     relatedAlertIds: [...alertIds],
     strReady: strReady || undefined,
     confidence,
+    confidenceReason,
   };
 }
 
